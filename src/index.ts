@@ -9,7 +9,6 @@ import { RateResolver } from "./resolvers/rate-resolver";
 import { Game } from "./entities/game";
 import { Rate } from "./entities/rate";
 import { User } from "./entities/user";
-import { seedDatabase } from "./helpers";
 
 export interface Context {
   user: User;   
@@ -36,8 +35,6 @@ async function bootstrap() {
       cache: true,
     }).catch(err => console.log(err));
 
-    // seed database with some data
-    const { defaultUser } = await seedDatabase();
 
     // build TypeGraphQL executable schema
     const schema = await TypeGraphQL.buildSchema({
@@ -45,11 +42,8 @@ async function bootstrap() {
       container: Container,
     });
 
-    // create mocked context
-    const context: Context = { user: defaultUser };
-
     // Create GraphQL server
-    const server = new ApolloServer({ schema, context });
+    const server = new ApolloServer({ schema });
 
     // Start the server
     const { url } = await server.listen(4000);
