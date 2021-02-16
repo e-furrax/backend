@@ -23,18 +23,18 @@ async function bootstrap() {
     // create TypeORM connection
     await TypeORM.createConnection({
       type: "postgres",
-      database: "postgres",
+      database: "furrax",
       username: "furrax", // fill this with your username
       password: "furrax", // and password
-      port: 5434, // and port
-      host: "localhost", // and host
+      port: 5432, // and port,
+      host: "postgres", // and host
       entities: [Game, Rate, User],
       synchronize: true,
       logger: "advanced-console",
       logging: "all",
       dropSchema: true,
       cache: true,
-    });
+    }).catch(err => console.log(err));
 
     // seed database with some data
     const { defaultUser } = await seedDatabase();

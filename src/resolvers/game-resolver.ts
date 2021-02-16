@@ -1,4 +1,4 @@
-import { Resolver, Query, FieldResolver, Arg, Root, Mutation, Ctx, Int } from "../../../src";
+import { Resolver, Query, FieldResolver, Arg, Root, Mutation, Ctx, Int } from "type-graphql";
 import { Repository } from "typeorm";
 import { InjectRepository } from "typeorm-typedi-extensions";
 
@@ -9,27 +9,27 @@ import { User } from "../entities/user";
 import { GameInput } from "./types/game-input";
 import { RateInput } from "./types/rate-input";
 
-@Resolver(of => Game)
+@Resolver(() => Game)
 export class GameResolver {
   constructor(
-    @InjectRepository(Game) private readonly gameRepository: Repository<Recipe>,
+    @InjectRepository(Game) private readonly gameRepository: Repository<Game>,
     @InjectRepository(Rate) private readonly ratingsRepository: Repository<Rate>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  @Query(returns => Game, { nullable: true })
-  game(@Arg("recipeId", type => Int) recipeId: number) {
+  @Query(() => Game, { nullable: true })
+  game(@Arg("recipeId", () => Int) recipeId: number) {
     return this.gameRepository.findOne(recipeId);
   }
 
-  @Query(returns => [Game])
+  @Query(() => [Game])
   games(): Promise<Game[]> {
     return this.gameRepository.find();
   }
 
-  @Mutation(returns => Game)
+  @Mutation(() => Game)
   async addGame(
-    @Arg("game") recipeInput: GameInput,
+    @Arg("game") gameInput: GameInput,
     @Ctx() { user }: Context,
   ): Promise<Game> {
     const game = this.gameRepository.create({
@@ -39,7 +39,7 @@ export class GameResolver {
     return await this.gameRepository.save(game);
   }
 
-  @Mutation(returns => Game)
+  @Mutation(() => Game)
   async rate(@Arg("rate") rateInput: RateInput, @Ctx() { user }: Context): Promise<Game> {
     // find the game
     const game = await this.gameRepository.findOne(rateInput.gameId, {

@@ -9,7 +9,7 @@ import { User } from './user';
 @ObjectType()
 export class Game {
 
-    @Field(type => ID)
+    @Field(() => ID)
     @PrimaryGeneratedColumn()
     readonly id: number;
 
@@ -21,12 +21,12 @@ export class Game {
     @Column({ nullable: true })
     description?: string;
 
-    @Field(type => [Rate])
-    @OneToMany(type => Rate, rate => rate.game, { cascade: ["insert"] })
+    @Field(() => [Rate])
+    @OneToMany(() => Rate, rate => rate.game, { cascade: ["insert"] })
     ratings: Rate[];
   
-    @Field(type => User)
-    @ManyToOne(type => User)
+    @Field(() => User)
+    @ManyToOne(() => User)
     author: User;
 
     @RelationId((game: Game) => game.author)

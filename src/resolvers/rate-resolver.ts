@@ -5,7 +5,7 @@ import { InjectRepository } from "typeorm-typedi-extensions";
 import { Rate } from "../entities/rate";
 import { User } from "../entities/user";
 
-@Resolver(of => Rate)
+@Resolver(() => Rate)
 export class RateResolver {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
 

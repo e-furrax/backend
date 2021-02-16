@@ -10,12 +10,12 @@ export class Rate {
     @PrimaryGeneratedColumn()
     readonly id: number;
 
-    @Field(type => Int)
+    @Field(() => Int)
     @Column({ type: "int" })
     value: number;
 
-    @Field(type => User)
-    @ManyToOne(type => User)
+    @Field(() => User)
+    @ManyToOne(() => User)
     user: User;
 
     @RelationId((rate: Rate) => rate.user)
@@ -25,7 +25,7 @@ export class Rate {
     @CreateDateColumn()
     date: Date;
 
-    @ManyToOne(type => Game)
+    @ManyToOne(() => Game)
     game: Game;
 
     @RelationId((rate: Rate) => rate.game)
