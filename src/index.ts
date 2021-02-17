@@ -4,7 +4,7 @@ import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
 
-import { RegisterResolver } from './modules/user/Register';
+import { UserResolver } from './modules/user/User';
 import { User } from './entities/User';
 import { Game } from './entities/Game';
 import { Rating } from './entities/Rating';
@@ -28,11 +28,11 @@ async function bootstrap() {
 
 		// build TypeGraphQL executable schema
 		const schema = await TypeGraphQL.buildSchema({
-			resolvers: [RegisterResolver],
+			resolvers: [UserResolver],
 		});
 
 		// Create GraphQL server
-		const server = new ApolloServer({ schema });
+		const server = new ApolloServer({ schema, context: ({ req, res }) => ({ req, res }) });
 
 		server.applyMiddleware({ app, path });
 
