@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "apollo-server": "^2.21.0",
+    "apollo-server-express": "^2.21.0",
     "class-validator": "^0.13.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

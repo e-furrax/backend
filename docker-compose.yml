@@ -3,25 +3,28 @@ services:
   postgres:
     image: postgres:10
     restart: always
+    container_name: postgres_container
     # Uncomment the next two lines to connect to your your database from outside the Docker environment, e.g. using a database GUI like Postico
-    # ports:
-    # - "5432:5432"
+    ports:
+      - '5432:5432'
     environment:
       - POSTGRES_DB=furrax
-      - POSTGRES_USER=furrax 
+      - POSTGRES_USER=furrax
       - POSTGRES_PASSWORD=furrax
     volumes:
       - postgres:/var/lib/postgresql/data
   node:
-    image: "node:12"
+    image: 'node:12'
     working_dir: /home/node/app
     environment:
       - NODE_ENV=development
     volumes:
       - ./:/home/node/app
-    expose:
-      - "3000"
-    command: "npm run dev"
+    ports:
+      - '3000:3000'
+    command: 'npm run dev'
+    depends_on:
+      - postgres
 
 volumes:
   postgres:
