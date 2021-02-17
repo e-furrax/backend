@@ -9,8 +9,11 @@ import { Game } from './entities/Game';
 import { Rating } from './entities/Rating';
 import { GameResolver } from './modules/game/GameResolver';
 import { UserResolver } from './modules/user/UserResolver';
+import { HistoryModel as History } from './entities/History';
 
-const app = express();
+const postgresApp = express();
+const mongoApp = express();
+
 const path = '/graphql';
 
 async function bootstrap() {
@@ -35,10 +38,10 @@ async function bootstrap() {
 		// Create GraphQL server
 		const server = new ApolloServer({ schema, context: ({ req, res }) => ({ req, res }) });
 
-		server.applyMiddleware({ app, path });
+		server.applyMiddleware({ app: postgresApp, path });
 
-		// Start the server
-		app.listen(3000, () => {
+		// start the server
+		postgresApp.listen(3000, () => {
 			console.log(
 				`Server is running, GraphQL Playground available at http://localhost:3000/graphql`
 			);
@@ -48,4 +51,40 @@ async function bootstrap() {
 	}
 }
 
+async function bootstrap2() {
+	try {
+		// create TypeORM connection
+		await TypeORM.createConnection({
+			type: 'mongodb',
+			url: 'mongodb://furrax:furrax@mongo_container/furrax',
+			entities: [History],
+			synchronize: true,
+			logger: 'advanced-console',
+			logging: true,
+			dropSchema: false,
+			cache: true,
+		});
+
+		// build TypeGraphQL executable schema
+		const schema = await TypeGraphQL.buildSchema({
+			resolvers: [UserResolver, GameResolver],
+		});
+
+		// create GraphQL server
+		const server = new ApolloServer({ schema });
+
+		server.applyMiddleware({ app: mongoApp, path });
+
+		// start the server
+		mongoApp.listen(4000, () => {
+			console.log(
+				`Server is running, GraphQL Playground available at http://localhost:4000/graphql`
+			);
+		});
+	} catch (err) {
+		console.error(err);
+	}
+}
+
 bootstrap();
+bootstrap2();
