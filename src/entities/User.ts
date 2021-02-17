@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID } from 'type-graphql';
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Rating } from './Rating';
 
 @ObjectType()
 @Entity()
@@ -18,4 +19,7 @@ export class User extends BaseEntity {
 
 	@Column()
 	password: string;
+
+	@OneToMany(() => Rating, (rating) => rating.user)
+	ratings: Rating[];
 }

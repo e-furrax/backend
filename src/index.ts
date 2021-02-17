@@ -6,6 +6,8 @@ import express from 'express';
 
 import { RegisterResolver } from './modules/user/Register';
 import { User } from './entities/User';
+import { Game } from './entities/Game';
+import { Rating } from './entities/Rating';
 
 const app = express();
 const path = '/graphql';
@@ -16,7 +18,7 @@ async function bootstrap() {
 		await TypeORM.createConnection({
 			type: 'postgres',
 			url: 'postgres://furrax:furrax@postgres_container/furrax',
-			entities: [User],
+			entities: [User, Game, Rating],
 			synchronize: true,
 			logger: 'advanced-console',
 			logging: true,
