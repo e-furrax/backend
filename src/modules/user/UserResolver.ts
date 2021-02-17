@@ -30,7 +30,7 @@ export class UserResolver {
 
 	@Query(() => String)
 	@UseMiddleware(isAuth)
-	async Me(@Ctx() { payload }: MyContext) {
+	async me(@Ctx() { payload }: MyContext) {
 		return `Your user id : ${payload?.userId}`;
 	}
 

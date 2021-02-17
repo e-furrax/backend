@@ -4,10 +4,11 @@ import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
 
-import { UserResolver } from './modules/user/User';
 import { User } from './entities/User';
 import { Game } from './entities/Game';
 import { Rating } from './entities/Rating';
+import { GameResolver } from './modules/game/GameResolver';
+import { UserResolver } from './modules/user/UserResolver';
 
 const app = express();
 const path = '/graphql';
@@ -28,7 +29,7 @@ async function bootstrap() {
 
 		// build TypeGraphQL executable schema
 		const schema = await TypeGraphQL.buildSchema({
-			resolvers: [UserResolver],
+			resolvers: [UserResolver, GameResolver],
 		});
 
 		// Create GraphQL server
