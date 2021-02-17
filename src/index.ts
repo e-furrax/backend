@@ -1,22 +1,11 @@
 import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
-import { Container } from 'typedi';
 import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
 
-import { GameResolver } from './resolvers/game-resolver';
-import { RateResolver } from './resolvers/rate-resolver';
-// import { Game } from './entities/game';
-// import { Rate } from './entities/rate';
-import { User } from './entities/user';
-
-export interface Context {
-	user: User;
-}
-
-// register 3rd party IOC container
-TypeORM.useContainer(Container);
+import { RegisterResolver } from './modules/user/Register';
+import { User } from './entities/User';
 
 const app = express();
 const path = '/graphql';
@@ -27,14 +16,17 @@ async function bootstrap() {
 		await TypeORM.createConnection({
 			type: 'postgres',
 			url: 'postgres://furrax:furrax@postgres_container/furrax',
-		})
-			.then((res) => console.log(res))
-			.catch((err) => console.log(err));
+			entities: [User],
+			synchronize: true,
+			logger: 'advanced-console',
+			logging: true,
+			dropSchema: true,
+			cache: true,
+		});
 
 		// build TypeGraphQL executable schema
 		const schema = await TypeGraphQL.buildSchema({
-			resolvers: [GameResolver, RateResolver],
-			container: Container,
+			resolvers: [RegisterResolver],
 		});
 
 		// Create GraphQL server
