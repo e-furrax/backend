@@ -9,8 +9,8 @@ import { Game } from './entities/Game';
 import { Rating } from './entities/Rating';
 import { GameResolver } from './modules/game/GameResolver';
 import { UserResolver } from './modules/user/UserResolver';
-import { HistoryModel as History } from './entities/mongo/History';
-import { CalendarModel as Calendar } from './entities/mongo/Calendar';
+import { HistoryModel as History } from './entities/History';
+import { CalendarModel as Calendar } from './entities/Calendar';
 
 const postgresApp = express();
 const mongoApp = express();
