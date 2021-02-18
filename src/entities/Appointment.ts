@@ -1,9 +1,21 @@
-import { prop } from '@typegoose/typegoose';
+import { ObjectId } from 'mongodb';
+import { prop as Property } from '@typegoose/typegoose';
+import { Field, Int, ObjectType, ID } from 'type-graphql';
 
+@ObjectType()
 export class Appointment {
-  @prop()
-  public userId!: number;
+  @Field(() => ID)
+  readonly id: ObjectId;
 
-  @prop()
-  public date!: Date;
+  @Field(() => Int)
+  @Property({ required: true })
+  public userId: number;
+
+  @Field()
+  @Property({ default: new Date(), required: true })
+  public date: Date;
+
+  @Field(() => Int)
+  @Property({ required: true })
+  public price: number;
 }

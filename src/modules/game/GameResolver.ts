@@ -1,6 +1,5 @@
 import { Game } from '../../entities/Game';
 import { Resolver, Query, Mutation, Arg } from 'type-graphql';
-import { userInfo } from 'os';
 import { InsertGameInput } from './InsertGameInput';
 
 @Resolver()

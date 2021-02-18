@@ -1,16 +1,20 @@
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
+import { ObjectId } from 'mongodb';
+import { prop as Property, getModelForClass, Ref } from '@typegoose/typegoose';
+import { ObjectType, Field, Int, ID } from 'type-graphql';
 import { Appointment } from './Appointment';
 
-class Calendar {
-  @prop()
-  public furryId!: number
+@ObjectType()
+export class Calendar {
+  @Field(() => ID)
+  readonly id: ObjectId;
 
-  @prop({ ref: 'Appointment' })
-  public appointments?: Ref<Appointment>[];
+  @Field(() => Int)
+  @Property({ unique: true, required: true })
+  public userId: number
+
+  @Field(() => [Appointment])
+  @Property({ ref: 'Appointment', default: [] })
+  public appointments: Ref<Appointment>[];
 }
 
-const CalendarModel = getModelForClass(Calendar);
-
-export {
-    CalendarModel,
-}
+export const CalendarModel = getModelForClass(Calendar);
