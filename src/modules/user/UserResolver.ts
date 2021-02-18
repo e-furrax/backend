@@ -52,7 +52,7 @@ export class UserResolver {
 		const user = await User.findOne({ where: { email } });
 
 		if (!user) {
-			throw new Error('could not find user');
+			throw new Error('Could not find user');
 		}
 
 		const verify = bcrypt.compare(password, user.password);
