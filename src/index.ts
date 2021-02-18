@@ -9,7 +9,8 @@ import { Game } from './entities/Game';
 import { Rating } from './entities/Rating';
 import { GameResolver } from './modules/game/GameResolver';
 import { UserResolver } from './modules/user/UserResolver';
-import { HistoryModel as History } from './entities/History';
+import { HistoryModel as History } from './entities/mongo/History';
+import { CalendarModel as Calendar } from './entities/mongo/Calendar';
 
 const postgresApp = express();
 const mongoApp = express();
@@ -57,7 +58,7 @@ async function bootstrap2() {
 		await TypeORM.createConnection({
 			type: 'mongodb',
 			url: 'mongodb://furrax:furrax@mongo_container/furrax',
-			entities: [History],
+			entities: [History, Calendar],
 			synchronize: true,
 			logger: 'advanced-console',
 			logging: true,
