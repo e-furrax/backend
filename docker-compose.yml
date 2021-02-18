@@ -16,15 +16,30 @@ services:
   node:
     image: 'node:12'
     working_dir: /home/node/app
+    restart: unless-stopped
     environment:
       - NODE_ENV=development
     volumes:
       - ./:/home/node/app
     ports:
       - '3000:3000'
+      - '4000:4000'
     command: 'npm run dev'
     depends_on:
       - postgres
+      - mongo
+  mongo:
+    container_name: mongo_container
+    image: mongo:4.4.4
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin-furrax
+      MONGO_INITDB_ROOT_PASSWORD: admin-furrax
+      MONGO_INITDB_DATABASE: furrax
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
 volumes:
   postgres:
