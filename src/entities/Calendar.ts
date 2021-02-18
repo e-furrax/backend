@@ -13,8 +13,8 @@ export class Calendar {
   public userId: number
 
   @Field(() => [Appointment])
-  @Property({ ref: 'Appointment', default: [] })
-  public appointments: Ref<Appointment>[];
+  @Property({ type: () => Appointment, default: [] })
+  public appointments: Appointment[];
 }
 
 export const CalendarModel = getModelForClass(Calendar);
