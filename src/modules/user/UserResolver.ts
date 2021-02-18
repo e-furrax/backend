@@ -14,6 +14,7 @@ import { RegisterInput } from './register/RegisterInput';
 import { isAuth } from '../../middlewares/isAuth';
 import { MyContext } from 'src/MyContext';
 import { sign } from 'jsonwebtoken';
+import {UserInput} from "./UserInput";
 
 @ObjectType()
 class LoginResponse {
@@ -26,6 +27,11 @@ export class UserResolver {
 	@Query(() => [User])
 	async getUsers() {
 		return await User.find();
+	}
+
+	@Query(() => User, { nullable: true })
+	async getUser(@Arg('id') data: UserInput) {
+		return await User.findOne({ ...data });
 	}
 
 	@Query(() => String)
