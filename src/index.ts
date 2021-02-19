@@ -7,6 +7,7 @@ import express from 'express';
 
 import { User } from './entities/User';
 import { Game } from './entities/Game';
+import { Language } from './entities/Language';
 import { Rating } from './entities/Rating';
 import { GameResolver } from './modules/game/GameResolver';
 import { UserResolver } from './modules/user/UserResolver';
@@ -22,7 +23,7 @@ async function bootstrap() {
 		await TypeORM.createConnection({
 			type: 'postgres',
 			url: 'postgres://furrax:furrax@postgres_container/furrax',
-			entities: [User, Game, Rating],
+			entities: [User, Game, Rating, Language],
 			synchronize: true,
 			logger: 'advanced-console',
 			logging: true,
@@ -67,7 +68,7 @@ async function bootstrap2() {
 			);
 		});
 	} catch (err) {
-		
+
 		console.error(err);
 	}
 }

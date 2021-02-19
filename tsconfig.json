@@ -33,6 +33,7 @@
   ],
   "include": [
     "./src/**/*.tsx",
-    "./src/**/*.ts"
-  ],
+    "./src/**/*.ts",
+    "node_modules/highlight.js/types/index.d.ts"
+  ]
 }

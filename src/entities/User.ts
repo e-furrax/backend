@@ -1,6 +1,9 @@
 import { ObjectType, Field, ID } from 'type-graphql';
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {BaseEntity, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, JoinTable} from 'typeorm';
 import { Rating } from './Rating';
+import {Game} from "./Game";
+import {Language} from "./Language";
+
 
 @ObjectType()
 @Entity()
@@ -26,4 +29,14 @@ export class User extends BaseEntity {
 
 	@OneToMany(() => Rating, (rating) => rating.user)
 	ratings: Rating[];
+
+	@Field(() => [Game], {nullable: true})
+	@ManyToMany(() => Game)
+	@JoinTable()
+	games: Game[];
+
+	@Field(() => [Language], {nullable: true})
+	@ManyToMany(() => Language)
+	@JoinTable()
+	languages: Language[];
 }
