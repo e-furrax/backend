@@ -30,7 +30,7 @@ export class UserResolver {
 	}
 
 	@Query(() => User, { nullable: true })
-	async getUser(@Arg('id') data: UserInput) {
+	async getUser(@Arg('data') data: UserInput) {
 		return await User.findOne({ ...data });
 	}
 
