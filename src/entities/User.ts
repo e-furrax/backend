@@ -18,7 +18,7 @@ export class User extends BaseEntity {
 	username: string;
 
 	@Field()
-	@Column('varchar')
+	@Column('varchar', { nullable: true })
 	description: string;
 
 	@Column()
