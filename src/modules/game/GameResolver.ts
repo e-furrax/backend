@@ -18,7 +18,7 @@ export class GameResolver {
 		return game;
 	}
 
-	@Mutation(() => Game)
+	@Mutation(() => Boolean)
 	async deleteGame(@Arg('id') id: string): Promise<boolean> {
 		const game = await Game.findOne({ where: { id } });
 		if (!game) {

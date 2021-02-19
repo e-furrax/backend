@@ -11,6 +11,7 @@ import { Rating } from './entities/Rating';
 import { GameResolver } from './modules/game/GameResolver';
 import { UserResolver } from './modules/user/UserResolver';
 import { CalendarResolver } from './modules/calendar/CalendarResolver';
+import { SearchResolver } from './modules/search/SearchResolver';
 
 const postgresApp = express();
 const mongoApp = express();
@@ -31,7 +32,7 @@ async function bootstrap() {
 		});
 
 		const schema = await TypeGraphQL.buildSchema({
-			resolvers: [UserResolver, GameResolver],
+			resolvers: [UserResolver, GameResolver, SearchResolver],
 		});
 
 		const server = new ApolloServer({ schema, context: ({ req, res }) => ({ req, res }) });
@@ -67,7 +68,6 @@ async function bootstrap2() {
 			);
 		});
 	} catch (err) {
-		
 		console.error(err);
 	}
 }
