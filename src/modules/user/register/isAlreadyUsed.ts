@@ -18,7 +18,7 @@ export class IsUsernameAlreadyUsedConstraint
 }
 
 export function IsUsernameAlreadyUsed(validationOptions?: ValidationOptions) {
-    return function (object: Object, propertyName: string) {
+    return function (object: Record<string, unknown>, propertyName: string) {
         registerDecorator({
             target: object.constructor,
             propertyName: propertyName,
@@ -41,7 +41,7 @@ export class IsEmailAlreadyUsedConstraint
 }
 
 export function IsEmailAlreadyUsed(validationOptions?: ValidationOptions) {
-    return function (object: Object, propertyName: string) {
+    return function (object: Record<string, unknown>, propertyName: string) {
         registerDecorator({
             target: object.constructor,
             propertyName: propertyName,
