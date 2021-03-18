@@ -1,43 +1,43 @@
-import { Game } from '../../entities/Game';
-import { Resolver, Query, Mutation, Arg } from 'type-graphql';
-import { InsertGameInput } from './InsertGameInput';
+import { Game } from "../../entities/Game";
+import { Resolver, Query, Mutation, Arg } from "type-graphql";
+import { InsertGameInput } from "./InsertGameInput";
 
 @Resolver()
 export class GameResolver {
-	@Query(() => [Game])
-	async getGames() {
-		return await Game.find();
-	}
+  @Query(() => [Game])
+  async getGames() {
+    return await Game.find();
+  }
 
-	@Mutation(() => Game)
-	async createGame(@Arg('data') data: InsertGameInput): Promise<Game> {
-		const game = await Game.create({
-			...data,
-		}).save();
+  @Mutation(() => Game)
+  async createGame(@Arg("data") data: InsertGameInput): Promise<Game> {
+    const game = await Game.create({
+      ...data,
+    }).save();
 
-		return game;
-	}
+    return game;
+  }
 
-	@Mutation(() => Boolean)
-	async deleteGame(@Arg('id') id: string): Promise<boolean> {
-		const game = await Game.findOne({ where: { id } });
-		if (!game) {
-			throw new Error(`The game with id : ${id} does not exist`);
-		}
-		await game.remove();
+  @Mutation(() => Boolean)
+  async deleteGame(@Arg("id") id: string): Promise<boolean> {
+    const game = await Game.findOne({ where: { id } });
+    if (!game) {
+      throw new Error(`The game with id : ${id} does not exist`);
+    }
+    await game.remove();
 
-		return true;
-	}
+    return true;
+  }
 
-	@Mutation(() => Game)
-	async updateGame(@Arg('id') id: string, @Arg('data') data: InsertGameInput) {
-		const game = await Game.findOne({ where: { id } });
-		if (!game) {
-			throw new Error(`The game with id: ${id} does not exist`);
-		}
-		Object.assign(game, data);
-		await game.save();
+  @Mutation(() => Game)
+  async updateGame(@Arg("id") id: string, @Arg("data") data: InsertGameInput) {
+    const game = await Game.findOne({ where: { id } });
+    if (!game) {
+      throw new Error(`The game with id: ${id} does not exist`);
+    }
+    Object.assign(game, data);
+    await game.save();
 
-		return game;
-	}
+    return game;
+  }
 }

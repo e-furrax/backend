@@ -1,7 +1,7 @@
-import { ObjectId } from 'mongodb';
-import { prop as Property, getModelForClass, Ref } from '@typegoose/typegoose';
-import { ObjectType, Field, Int, ID } from 'type-graphql';
-import { Appointment } from './Appointment';
+import { ObjectId } from "mongodb";
+import { prop as Property, getModelForClass, Ref } from "@typegoose/typegoose";
+import { ObjectType, Field, Int, ID } from "type-graphql";
+import { Appointment } from "./Appointment";
 
 @ObjectType()
 export class Calendar {
@@ -10,7 +10,7 @@ export class Calendar {
 
   @Field(() => Int)
   @Property({ unique: true, required: true })
-  public userId: number
+  public userId: number;
 
   @Field(() => [Appointment])
   @Property({ type: () => Appointment, default: [] })
