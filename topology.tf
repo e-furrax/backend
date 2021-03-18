@@ -77,8 +77,8 @@ resource "aws_security_group_rule" "my_security_group_rule_ssh_in" {
 }
 
 resource "aws_key_pair" "admin" {
-  key_name = "admin"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDkE/I3ubtNfVEx9MPGvm5Xfzbe/mdM1XAOCRD6bhTIuLKChgnGDv8gop5zC7h/K2pCPtOaVIO7TvWTrtcg6jcCSizQ1G/prJdVhb/YamSCtLVt2Hl39wZ7T+CQ7u+jQi310PlYb4YCjiMnj3VnLZH13bUpmY7xPZJAqgHtOqKmeXgmLUJPI3+xI6T2Mzb2Wkdy3UOWO9zWPJLojmXrRHbWj0obPrdMXC6NrfH2LOCDstM2GzsXCsHBVsrkmbVIglmq3Yz198bzvGkjR3g3SMpC++N0Bon/kj56MAUTempOHBiZXxPLheJ43H4m8g0OJvA9QyWnZhomynFjmHRzFKyN scorpiz@DABEAST"
+  key_name   = "admin"
+  public_key = file("ssh-keys/id_rsa_aws.pub")
 }
 
 resource "aws_instance" "web" {
@@ -87,7 +87,7 @@ resource "aws_instance" "web" {
   instance_type               = "t2.micro"
   vpc_security_group_ids      = [aws_security_group.my_security_group.id]
   associate_public_ip_address = true
-  key_name = "admin"
+  key_name                    = "admin"
   tags = {
     Name = "Nodejs"
     User = "thomas.gorszczyk"
