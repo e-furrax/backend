@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { prop as Property, getModelForClass, Ref } from '@typegoose/typegoose';
+import { prop as Property, getModelForClass } from '@typegoose/typegoose';
 import { ObjectType, Field, Int, ID } from 'type-graphql';
 import { Appointment } from './Appointment';
 
