@@ -1,8 +1,6 @@
 name: Common Jobs CI
 
-on:
-    push:
-    pull_request:
+on: push
 
 jobs:
     lint:
