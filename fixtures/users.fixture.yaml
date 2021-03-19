@@ -1,0 +1,17 @@
+entity: User
+items:
+  user0:
+    username: bob
+    email: bob@gmail.com
+    description: '{{lorem.paragraph}}'
+    password: '1234'
+  user1:
+    username: xavier
+    email: xavier@gmail.com
+    description: '{{lorem.paragraph}}'
+    password: '1234'
+  user2:
+    username: jean
+    email: jean@gmail.com
+    description: '{{lorem.paragraph}}'
+    password: '1234'
