@@ -26,7 +26,7 @@ jobs:
               run: yarn
 
             - name: Run ESLint
-              run: yarn run eslint ./src --ext .js,.ts
+              run: yarn run lint
 
             - name: Run Tests
               run: yarn test
