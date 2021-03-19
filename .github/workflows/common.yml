@@ -1,0 +1,14 @@
+name: Common Jobs CI
+
+on: push
+
+jobs:
+    lint:
+        name: 'Linter check'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install modules
+              run: yarn add eslint -D
+            - name: Run ESLint
+              run: yarn run eslint ./src --ext .js,.ts
