@@ -4,6 +4,7 @@ import { connect } from 'mongoose';
 import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
+import * as path from 'path';
 
 import { User } from './entities/User';
 import { Game } from './entities/Game';
@@ -12,15 +13,22 @@ import { GameResolver } from './modules/game/GameResolver';
 import { UserResolver } from './modules/user/UserResolver';
 import { CalendarResolver } from './modules/calendar/CalendarResolver';
 import { SearchResolver } from './modules/search/SearchResolver';
+import {
+    Builder,
+    fixturesIterator,
+    Loader,
+    Parser,
+    Resolver,
+} from 'typeorm-fixtures-cli/dist';
 
 const postgresApp = express();
 const mongoApp = express();
 
-const path = '/graphql';
+const GQLpath = '/graphql';
 
 async function bootstrap() {
     try {
-        await TypeORM.createConnection({
+        const connection = await TypeORM.createConnection({
             type: 'postgres',
             url: 'postgres://furrax:furrax@postgres_container/furrax',
             entities: [User, Game, Rating],
@@ -31,6 +39,18 @@ async function bootstrap() {
             cache: true,
         });
 
+        const loader = new Loader();
+        loader.load(path.resolve('./src/fixtures'));
+
+        const resolver = new Resolver();
+        const fixtures = resolver.resolve(loader.fixtureConfigs);
+        const builder = new Builder(connection, new Parser());
+
+        for (const fixture of fixturesIterator(fixtures)) {
+            const entity = await builder.build(fixture);
+            await TypeORM.getRepository(entity.constructor.name).save(entity);
+        }
+
         const schema = await TypeGraphQL.buildSchema({
             resolvers: [UserResolver, GameResolver, SearchResolver],
         });
@@ -40,7 +60,7 @@ async function bootstrap() {
             context: ({ req, res }) => ({ req, res }),
         });
 
-        server.applyMiddleware({ app: postgresApp, path });
+        server.applyMiddleware({ app: postgresApp, path: GQLpath });
 
         postgresApp.listen(3000, () => {
             console.log(
@@ -66,7 +86,7 @@ async function bootstrap2() {
             context: ({ req, res }) => ({ req, res }),
         });
 
-        server.applyMiddleware({ app: mongoApp, path });
+        server.applyMiddleware({ app: mongoApp, path: GQLpath });
 
         mongoApp.listen(4000, () => {
             console.log(
@@ -78,5 +98,11 @@ async function bootstrap2() {
     }
 }
 
-bootstrap();
+bootstrap()
+    .then(() => {
+        console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.');
+    })
+    .catch((err) => {
+        console.log(err);
+    });
 bootstrap2();
