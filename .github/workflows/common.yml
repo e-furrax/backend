@@ -9,6 +9,6 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Install modules
-              run: yarn
+              run: yarn add eslint -D
             - name: Run ESLint
               run: yarn run eslint ./src --ext .js,.ts
