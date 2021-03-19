@@ -4,10 +4,11 @@ on: push
 
 jobs:
     lint:
+        name: 'Linter check'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
             - name: Install modules
-              run: npm install
+              run: npm install -D eslint
             - name: Run ESLint
-              run: eslint ./src --ext .js,.ts
+              run: eslint ./src --ext .js,.jsx,.ts,.tsx
