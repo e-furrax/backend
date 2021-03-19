@@ -40,7 +40,7 @@ async function bootstrap() {
         });
 
         const loader = new Loader();
-        loader.load(path.resolve('./fixtures'));
+        loader.load(path.resolve('./src/fixtures'));
 
         const resolver = new Resolver();
         const fixtures = resolver.resolve(loader.fixtureConfigs);
@@ -100,7 +100,7 @@ async function bootstrap2() {
 
 bootstrap()
     .then(() => {
-        console.log('Fixtures are successfully loaded:');
+        console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.');
     })
     .catch((err) => {
         console.log(err);
