@@ -3,12 +3,32 @@ name: Common Jobs CI
 on: push
 
 jobs:
-    lint:
-        name: 'Linter check'
+    common:
+        name: 'Common jobs'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
+
+           - name: Get yarn cache directory path
+             id: yarn-cache-dir-path
+             run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+            - uses: actions/cache@v2
+              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+              with:
+                path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                restore-keys: |
+                    ${{ runner.os }}-yarn-
+
             - name: Install modules
               run: yarn add eslint -D
+
             - name: Run ESLint
               run: yarn run eslint ./src --ext .js,.ts
+
+            - name: Run Tests
+              run: yarn test
+
+
+
