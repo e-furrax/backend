@@ -1,4 +1,4 @@
-import { Game } from '../../entities/Game';
+import { Game } from '../../../entities/postgres/Game';
 import { Resolver, Query, Mutation, Arg } from 'type-graphql';
 import { InsertGameInput } from './InsertGameInput';
 

@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from 'type-graphql';
-import { Appointment } from '../../entities/Appointment';
+import { Appointment } from '../../entities/mongo/Appointment';
 
 @InputType()
 export class AppointmentInput implements Partial<Appointment> {

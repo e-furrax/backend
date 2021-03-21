@@ -6,10 +6,8 @@ import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
 import * as path from 'path';
 
-import { User } from './entities/User';
-import { Game } from './entities/Game';
-import { Rating } from './entities/Rating';
-import { CalendarResolver } from './modules/calendar/CalendarResolver';
+import { PostgresModels } from './entities';
+import { MongoResolvers } from './modules';
 import {
     Builder,
     fixturesIterator,
@@ -25,12 +23,12 @@ const mongoApp = express();
 
 const GQLpath = '/graphql';
 
-async function bootstrap() {
+async function bootstrapPg() {
     try {
         const connection = await TypeORM.createConnection({
             type: 'postgres',
             url: 'postgres://furrax:furrax@postgres_container/furrax',
-            entities: [User, Game, Rating],
+            entities: PostgresModels,
             synchronize: true,
             logger: 'advanced-console',
             logging: true,
@@ -75,13 +73,13 @@ async function bootstrap() {
     }
 }
 
-async function bootstrap2() {
+async function bootstrapMongo() {
     try {
         await connect('mongodb://furrax:furrax@mongo_container/furrax');
         // await mongoose.connection.db.dropDatabase();
 
         const schema = await TypeGraphQL.buildSchema({
-            resolvers: [CalendarResolver],
+            resolvers: MongoResolvers,
         });
 
         const server = new ApolloServer({
@@ -101,11 +99,11 @@ async function bootstrap2() {
     }
 }
 
-bootstrap()
+bootstrapPg()
     .then(() => {
         console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.');
     })
     .catch((err) => {
         console.log(err);
     });
-bootstrap2();
+bootstrapMongo();

@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from 'type-graphql';
-import { Calendar } from '../../entities/Calendar';
+import { Calendar } from '../../../entities/mongo/Calendar';
 
 @InputType()
 export class CalendarInput implements Partial<Calendar> {
