@@ -6,3 +6,13 @@ export class UserInput implements Partial<User> {
     @Field(() => Int)
     public id: number;
 }
+
+@InputType()
+export class UpdateProfileInput implements Partial<User> {
+    @Field()
+    email: string;
+    @Field()
+    description?: string;
+    @Field()
+    username: string;
+}
