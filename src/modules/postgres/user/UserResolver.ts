@@ -9,10 +9,10 @@ import {
     Field,
 } from 'type-graphql';
 import * as bcrypt from 'bcryptjs';
-import { User } from '../../../entities/postgres/User';
+import { User } from '@/entities/postgres/User';
 import { RegisterInput } from './register/RegisterInput';
-import { isAuth } from '../../../middlewares/isAuth';
-import { MyContext } from '../../types/MyContext';
+import { isAuth } from '@/middlewares/isAuth';
+import { MyContext } from '@/types/MyContext';
 import { sign } from 'jsonwebtoken';
 import { UserInput } from './UserInput';
 

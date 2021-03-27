@@ -1,4 +1,4 @@
-import { Calendar, CalendarModel } from '../../../entities/mongo/Calendar';
+import { Calendar, CalendarModel } from '@/entities/mongo/Calendar';
 import {
     Resolver,
     Query,
@@ -10,9 +10,9 @@ import {
 import { DocumentType } from '@typegoose/typegoose';
 import { CalendarInput } from './CalendarInput';
 import { AppointmentInput } from './AppointmentInput';
-import { MyContext } from '../../types/MyContext';
-import { Appointment } from '../../../entities/mongo/Appointment';
-import { isAuth } from '../../../middlewares/isAuth';
+import { MyContext } from '@/types/MyContext';
+import { Appointment } from '@/entities/mongo/Appointment';
+import { isAuth } from '@/middlewares/isAuth';
 
 @Resolver()
 export class CalendarResolver {

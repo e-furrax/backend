@@ -1,8 +1,8 @@
+import { ObjectId } from 'mongodb';
 import { InputType, Field, Int } from 'type-graphql';
-import { Calendar } from '../../../entities/mongo/Calendar';
 
 @InputType()
-export class CalendarInput implements Partial<Calendar> {
+export class CalendarInput {
     @Field(() => Int)
-    public userId: number;
+    public userId: ObjectId;
 }

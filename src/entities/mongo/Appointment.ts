@@ -1,17 +1,20 @@
-import { prop as Property } from '@typegoose/typegoose';
-import { Field, Int, ObjectType } from 'type-graphql';
+import { ObjectId } from 'mongodb';
+import { prop as Property, getModelForClass } from '@typegoose/typegoose';
+import { Field, ID, ObjectType } from 'type-graphql';
+import { Transaction } from './Transaction';
 
 @ObjectType()
 export class Appointment {
-    @Field(() => Int)
+    @Field(() => ID)
     @Property({ required: true })
-    public userId: number;
+    public userId: ObjectId;
 
     @Field()
     @Property({ default: new Date(), required: true })
     public date: Date;
 
-    @Field(() => Int)
-    @Property({ required: true })
-    public price: number;
+    @Field(() => [Transaction])
+    @Property({ type: () => Transaction, default: [] })
+    public transaction: Transaction[];
 }
+export const AppointmentModel = getModelForClass(Appointment);

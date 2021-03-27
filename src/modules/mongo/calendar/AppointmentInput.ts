@@ -1,11 +1,9 @@
-import { InputType, Field, Int } from 'type-graphql';
-import { Appointment } from '../../entities/mongo/Appointment';
+import { ObjectId } from 'mongodb';
+import { InputType, Field, ID } from 'type-graphql';
+import { Appointment } from '@/entities/mongo/Appointment';
 
 @InputType()
 export class AppointmentInput implements Partial<Appointment> {
-    @Field(() => Int)
-    public userId: number;
-
-    @Field(() => Int)
-    public price: number;
+    @Field(() => ID)
+    public userId: ObjectId;
 }

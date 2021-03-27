@@ -1,5 +1,5 @@
-import { Game } from '../../../entities/postgres/Game';
-import { User } from '../../../entities/postgres/User';
+import { Game } from '@/entities/postgres/Game';
+import { User } from '@/entities/postgres/User';
 import { Arg, Field, ObjectType, Query, Resolver } from 'type-graphql';
 
 @ObjectType()
