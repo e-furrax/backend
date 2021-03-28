@@ -41,8 +41,8 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# local env files
-.env.local
-.env.*.local
+# env files
+.env.*
+.env
 
 tmp/

@@ -4,15 +4,29 @@ import { MyContext } from '../../types/MyContext';
 import {
     Arg,
     Ctx,
+    Field,
     Mutation,
+    ObjectType,
     Query,
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { UpdateProfileInput } from './UserInput';
+import { UpdateProfileInput } from './ProfileInput';
 import * as bcrypt from 'bcryptjs';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
-import { createWriteStream } from 'fs';
+import { avatarUploader } from '../../uploaders';
+
+@ObjectType()
+class ProfilePicResponse {
+    @Field()
+    filename: string;
+    @Field()
+    mimetype: string;
+    @Field()
+    encoding: string;
+    @Field()
+    uri: string;
+}
 
 @Resolver()
 export class ProfileResolver {
@@ -64,28 +78,40 @@ export class ProfileResolver {
         return true;
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => ProfilePicResponse)
     @UseMiddleware(isAuth)
     async updateProfilePic(
         @Ctx() { payload }: MyContext,
         @Arg('picture', () => GraphQLUpload)
-        { createReadStream, filename }: FileUpload
-    ): Promise<boolean> {
-        console.log('filena', filename);
+        { createReadStream, filename, mimetype, encoding }: FileUpload
+    ): Promise<ProfilePicResponse> {
+        console.log('filename', filename);
         const user = await User.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
         }
 
-        return new Promise((resolve, reject) => {
-            createReadStream()
-                .pipe(
-                    createWriteStream(
-                        __dirname + `/../../../tmp/images/${filename}`
-                    )
-                )
-                .on('finish', () => resolve(true))
-                .on('error', () => reject(false));
+        const uri = await avatarUploader.upload(createReadStream(), {
+            filename,
+            mimetype,
         });
+
+        return {
+            filename,
+            mimetype,
+            encoding,
+            uri,
+        };
+
+        // return new Promise((resolve, reject) => {
+        //     createReadStream()
+        //         .pipe(
+        //             createWriteStream(
+        //                 __dirname + `/../../../tmp/images/${filename}`
+        //             )
+        //         )
+        //         .on('finish', () => resolve(true))
+        //         .on('error', () => reject(false));
+        // });
     }
 }
