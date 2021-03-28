@@ -32,7 +32,6 @@ export class S3Uploader {
         stream: any,
         { filename, mimetype }: { filename: string; mimetype: string }
     ) {
-        console.log('Bucket', process.env.AWS_S3_BUCKET);
         const transformedFilename = this._filenameTransform(filename);
         const { Location } = await this._s3
             .upload(
