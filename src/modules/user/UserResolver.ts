@@ -12,9 +12,9 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../../entities/User';
 import { RegisterInput } from './register/RegisterInput';
 import { isAuth } from '../../middlewares/isAuth';
-import { MyContext } from 'src/MyContext';
+import { MyContext } from '../../types/MyContext';
 import { sign } from 'jsonwebtoken';
-import { UpdateProfileInput, UserInput } from './UserInput';
+import { UserInput } from './UserInput';
 
 @ObjectType()
 class LoginResponse {
@@ -77,53 +77,5 @@ export class UserResolver {
                 expiresIn: '15m',
             }),
         };
-    }
-
-    @Query(() => User)
-    @UseMiddleware(isAuth)
-    async getProfile(@Ctx() { payload }: MyContext): Promise<User | undefined> {
-        return await User.findOne(payload?.userId);
-    }
-
-    @Mutation(() => User)
-    @UseMiddleware(isAuth)
-    async updateProfile(
-        @Ctx() { payload }: MyContext,
-        @Arg('data') data: UpdateProfileInput
-    ): Promise<User> {
-        const user = await User.findOne(payload?.userId);
-        if (!user) {
-            throw new Error("Your profile couldn't be found");
-        }
-        Object.assign(user, data);
-        await user.save();
-
-        return user;
-    }
-
-    @Mutation(() => Boolean)
-    @UseMiddleware(isAuth)
-    async updatePassword(
-        @Ctx() { payload }: MyContext,
-        @Arg('initialPassword') initialPassword: string,
-        @Arg('newPassword') newPassword: string
-    ): Promise<boolean> {
-        const hashedPassword = await bcrypt.hash(newPassword, 12);
-        const user = await User.findOne(payload?.userId);
-        if (!user) {
-            throw new Error('Could not find user');
-        }
-
-        const verify = await bcrypt.compare(initialPassword, user.password);
-
-        if (!verify) {
-            throw new Error('Your initial password is wrong');
-        }
-
-        user.password = hashedPassword;
-
-        await user.save();
-
-        return true;
     }
 }

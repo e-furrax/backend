@@ -9,10 +9,7 @@ import * as path from 'path';
 import { User } from './entities/User';
 import { Game } from './entities/Game';
 import { Rating } from './entities/Rating';
-import { GameResolver } from './modules/game/GameResolver';
-import { UserResolver } from './modules/user/UserResolver';
 import { CalendarResolver } from './modules/calendar/CalendarResolver';
-import { SearchResolver } from './modules/search/SearchResolver';
 import {
     Builder,
     fixturesIterator,
@@ -20,6 +17,8 @@ import {
     Parser,
     Resolver,
 } from 'typeorm-fixtures-cli/dist';
+import { createSchema } from './utils/createSchema';
+import { graphqlUploadExpress } from 'graphql-upload';
 
 const postgresApp = express();
 const mongoApp = express();
@@ -51,14 +50,18 @@ async function bootstrap() {
             await TypeORM.getRepository(entity.constructor.name).save(entity);
         }
 
-        const schema = await TypeGraphQL.buildSchema({
-            resolvers: [UserResolver, GameResolver, SearchResolver],
-        });
+        const schema = await createSchema();
 
         const server = new ApolloServer({
             schema,
             context: ({ req, res }) => ({ req, res }),
+            uploads: false,
         });
+
+        postgresApp.use(
+            '/graphql',
+            graphqlUploadExpress({ maxFileSize: 10000, maxFiles: 10 })
+        );
 
         server.applyMiddleware({ app: postgresApp, path: GQLpath });
 
