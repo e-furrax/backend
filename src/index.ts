@@ -60,7 +60,7 @@ async function bootstrap() {
 
         postgresApp.use(
             '/graphql',
-            graphqlUploadExpress({ maxFileSize: 10000, maxFiles: 10 })
+            graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 })
         );
 
         server.applyMiddleware({ app: postgresApp, path: GQLpath });
