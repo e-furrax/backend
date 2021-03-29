@@ -16,18 +16,6 @@ import * as bcrypt from 'bcryptjs';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
 import { avatarUploader } from '../../uploaders';
 
-@ObjectType()
-class ProfilePicResponse {
-    @Field()
-    filename: string;
-    @Field()
-    mimetype: string;
-    @Field()
-    encoding: string;
-    @Field()
-    uri: string;
-}
-
 @Resolver()
 export class ProfileResolver {
     @Query(() => User)
@@ -78,14 +66,13 @@ export class ProfileResolver {
         return true;
     }
 
-    @Mutation(() => ProfilePicResponse)
+    @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
     async updateProfilePic(
         @Ctx() { payload }: MyContext,
         @Arg('picture', () => GraphQLUpload)
-        { createReadStream, filename, mimetype, encoding }: FileUpload
-    ): Promise<ProfilePicResponse> {
-        console.log('filename', filename);
+        { createReadStream, filename, mimetype }: FileUpload
+    ): Promise<boolean> {
         const user = await User.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
@@ -96,22 +83,9 @@ export class ProfileResolver {
             mimetype,
         });
 
-        return {
-            filename,
-            mimetype,
-            encoding,
-            uri,
-        };
+        user.profileImage = uri;
+        user.save();
 
-        // return new Promise((resolve, reject) => {
-        //     createReadStream()
-        //         .pipe(
-        //             createWriteStream(
-        //                 __dirname + `/../../../tmp/images/${filename}`
-        //             )
-        //         )
-        //         .on('finish', () => resolve(true))
-        //         .on('error', () => reject(false));
-        // });
+        return true;
     }
 }
