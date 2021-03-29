@@ -10,7 +10,7 @@ import {
 import { DocumentType } from '@typegoose/typegoose';
 import { CalendarInput } from './CalendarInput';
 import { AppointmentInput } from './AppointmentInput';
-import { MyContext } from '../../MyContext';
+import { MyContext } from '../../types/MyContext';
 import { Appointment } from '../../entities/Appointment';
 import { isAuth } from '../../middlewares/isAuth';
 

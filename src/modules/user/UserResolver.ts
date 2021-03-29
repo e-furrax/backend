@@ -12,7 +12,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from '../../entities/User';
 import { RegisterInput } from './register/RegisterInput';
 import { isAuth } from '../../middlewares/isAuth';
-import { MyContext } from 'src/MyContext';
+import { MyContext } from '../../types/MyContext';
 import { sign } from 'jsonwebtoken';
 import { UserInput } from './UserInput';
 
@@ -66,7 +66,7 @@ export class UserResolver {
             throw new Error('Could not find user');
         }
 
-        const verify = bcrypt.compare(password, user.password);
+        const verify = await bcrypt.compare(password, user.password);
 
         if (!verify) {
             throw new Error('Wrong password');

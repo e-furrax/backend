@@ -27,9 +27,11 @@ node_modules/
 # Intellij Configuration Files
 .idea/
 
+# SSH keys
 ssh-keys/
 .ssh/
 
+# Terraform state files
 **/.terraform/*
 *.tfstate
 *.tfstate.*
@@ -39,3 +41,8 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# env files
+.env.*
+.env
+
+tmp/

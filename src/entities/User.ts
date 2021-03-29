@@ -30,6 +30,10 @@ export class User extends BaseEntity {
     @Column()
     password: string;
 
+    @Field()
+    @Column('text', { nullable: true })
+    profileImage: string;
+
     @OneToMany(() => Rating, (rating) => rating.user)
     ratings: Rating[];
 }
