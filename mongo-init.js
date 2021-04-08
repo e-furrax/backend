@@ -3,7 +3,7 @@ db.createUser({
 	pwd: 'furrax',
 	roles: [
 		{
-			role: 'readWrite',
+			role: 'dbAdmin',
 			db: 'furrax',
 		},
 	],

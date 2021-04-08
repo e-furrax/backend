@@ -1,15 +1,19 @@
 import { ObjectId } from 'mongodb';
-import { InputType, Field, ID } from 'type-graphql';
+import { InputType, Field, Int, ObjectType, ID } from 'type-graphql';
 import { Transaction } from '@/entities/mongo/Transaction';
-
+@ObjectType()
 @InputType()
-export class TransactionInput implements Partial<Transaction> {
+export class NewTransactionInput implements Partial<Transaction> {
+    @Field(() => Int)
+    price: number;
+
     @Field(() => ID)
-    public id: ObjectId;
+    appointment: ObjectId;
+}
 
-    @Field()
-    public price: number;
-
-    @Field()
-    public status: string;
+@ObjectType()
+@InputType()
+export class FindTransactionInput implements Partial<Transaction> {
+    @Field(() => ID)
+    _id: ObjectId;
 }

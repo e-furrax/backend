@@ -4,7 +4,6 @@ services:
         image: postgres:10
         restart: always
         container_name: postgres_container
-        # Uncomment the next two lines to connect to your your database from outside the Docker environment, e.g. using a database GUI like Postico
         ports:
             - '5432:5432'
         environment:

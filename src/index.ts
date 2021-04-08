@@ -1,3 +1,4 @@
+import 'module-alias/register';
 import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
 import { connect } from 'mongoose';
@@ -75,8 +76,10 @@ async function bootstrapPg() {
 
 async function bootstrapMongo() {
     try {
-        await connect('mongodb://furrax:furrax@mongo_container/furrax');
-        // await mongoose.connection.db.dropDatabase();
+        const mongoose = await connect(
+            'mongodb://furrax:furrax@mongo_container/furrax'
+        );
+        await mongoose.connection.db.dropDatabase();
 
         const schema = await TypeGraphQL.buildSchema({
             resolvers: MongoResolvers,
@@ -98,7 +101,6 @@ async function bootstrapMongo() {
         console.error(err);
     }
 }
-
 bootstrapPg()
     .then(() => {
         console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.');
@@ -106,4 +108,5 @@ bootstrapPg()
     .catch((err) => {
         console.log(err);
     });
+
 bootstrapMongo();

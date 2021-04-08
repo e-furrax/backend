@@ -9,12 +9,12 @@ import {
 } from 'type-graphql';
 import { DocumentType } from '@typegoose/typegoose';
 import { CalendarInput } from './CalendarInput';
-import { AppointmentInput } from './AppointmentInput';
 import { MyContext } from '@/types/MyContext';
-import { Appointment } from '@/entities/mongo/Appointment';
+import { AppointmentModel } from '@/entities/mongo/Appointment';
 import { isAuth } from '@/middlewares/isAuth';
+import { AppointmentInput } from './AppointmentInput';
 
-@Resolver()
+@Resolver(() => Calendar)
 export class CalendarResolver {
     @Query(() => [Calendar])
     async getCalendars() {
@@ -27,11 +27,17 @@ export class CalendarResolver {
     }
 
     @Mutation(() => Calendar)
-    async createCalendar(@Arg('userId') userId: number): Promise<Calendar> {
-        const calendar: Calendar = new CalendarModel({
+    @UseMiddleware(isAuth)
+    async createCalendar(@Ctx() { payload }: MyContext): Promise<Calendar> {
+        const userId = payload?.userId;
+        if (!userId) {
+            return Promise.reject(Error('Missing User ID in Context'));
+        }
+        const calendar = new CalendarModel({
             userId,
             appointments: [],
-        }).save();
+        });
+        await calendar.save();
 
         return calendar;
     }
@@ -39,32 +45,37 @@ export class CalendarResolver {
     @Mutation(() => Calendar)
     @UseMiddleware(isAuth)
     async addAppointment(
-        @Arg('data') data: AppointmentInput,
-        @Ctx() { payload }: MyContext
+        @Ctx() { payload }: MyContext,
+        @Arg('appointmentInput') { title }: AppointmentInput
     ): Promise<Calendar> {
         return new Promise((resolve, reject) => {
+            const userId = payload?.userId;
+            if (!userId) {
+                reject(new Error('Missing User ID'));
+                return;
+            }
+
             CalendarModel.findOne(
-                { userId: payload?.userId },
-                (err: any, calendar: DocumentType<Calendar>) => {
+                { userId },
+                (err: any, calendar: DocumentType<Calendar> | null) => {
                     if (err) {
-                        reject(new Error(err));
-                        return;
+                        return reject(new Error(err));
                     }
 
                     if (!calendar) {
-                        reject(
+                        return reject(
                             new Error(
-                                `Calendar for user ${payload?.userId} not found.`
+                                `Calendar for User ID ${userId} not found.`
                             )
                         );
-                        return;
                     }
-
-                    const appointment: Appointment = {
-                        userId: data.userId,
+                    const appointment = new AppointmentModel({
+                        title,
                         date: new Date(),
-                        price: data.price,
-                    };
+                        transactions: [],
+                        calendar: calendar._id,
+                    });
+                    console.log(appointment.toString());
 
                     calendar.appointments.push(appointment);
                     calendar.save();

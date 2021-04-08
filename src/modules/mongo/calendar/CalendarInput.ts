@@ -1,8 +1,8 @@
-import { ObjectId } from 'mongodb';
-import { InputType, Field, Int } from 'type-graphql';
+import { InputType, Field, Int, ObjectType } from 'type-graphql';
 
+@ObjectType()
 @InputType()
 export class CalendarInput {
     @Field(() => Int)
-    public userId: ObjectId;
+    public userId: number;
 }

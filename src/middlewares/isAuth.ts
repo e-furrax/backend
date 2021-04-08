@@ -4,7 +4,6 @@ import { MiddlewareFn } from 'type-graphql';
 
 export const isAuth: MiddlewareFn<MyContext> = ({ context }, next) => {
     const authorization = context.req.headers['authorization'];
-
     if (!authorization) {
         throw new Error('Not authenticated');
     }
@@ -14,7 +13,7 @@ export const isAuth: MiddlewareFn<MyContext> = ({ context }, next) => {
         const payload = verify(token, 's3cr3tk3y') as MyContextPayload;
         context.payload = payload;
     } catch (err) {
-        throw new Error('Not authenticated');
+        throw new Error('Couldnt verify authorization token');
     }
     return next();
 };

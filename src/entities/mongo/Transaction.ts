@@ -1,10 +1,11 @@
 import { ObjectId } from 'mongodb';
 import { prop as Property, getModelForClass } from '@typegoose/typegoose';
 import { ObjectType, Field, ID } from 'type-graphql';
+import { Appointment } from './Appointment';
 @ObjectType()
 export class Transaction {
     @Field(() => ID)
-    readonly id: ObjectId;
+    readonly _id: ObjectId;
 
     @Field()
     @Property({ required: true })
@@ -18,8 +19,12 @@ export class Transaction {
     @Property({ default: 'PENDING', required: true })
     public status: string;
 
-    @Field()
-    @Property({ required: true })
-    public appointmentId: string;
+    @Field(() => Appointment)
+    @Property({ ref: 'Appointment', required: true })
+    public appointment: Appointment | ObjectId;
+
+    @Field({ nullable: true })
+    @Property()
+    public description?: string;
 }
 export const TransactionModel = getModelForClass(Transaction);
