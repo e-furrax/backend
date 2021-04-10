@@ -3,7 +3,7 @@ import {
     createTransport,
     getTestMessageUrl,
 } from 'nodemailer';
-export async function sendEmail(email: string, url: string) {
+export async function sendEmail(email: string, code: string) {
     const testAccount = await createTestAccount();
 
     const transporter = createTransport({
@@ -21,7 +21,7 @@ export async function sendEmail(email: string, url: string) {
         to: email, // list of receivers
         subject: 'Hello ✔', // Subject line
         text: 'Hello world?', // plain text body
-        html: `<a href="${url}">${url}</a>`, // html body
+        html: `Your code is <strong>${code}</strong>`, // html body
     };
 
     const info = await transporter.sendMail(emailOptions);

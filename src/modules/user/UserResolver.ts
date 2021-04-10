@@ -16,7 +16,7 @@ import { MyContext } from '../../types/MyContext';
 import { sign } from 'jsonwebtoken';
 import { UserInput } from './UserInput';
 import { sendEmail } from '../../utils/sendEmail';
-import { createConfirmationUrl } from '../../utils/createConfirmationUrl';
+import { createConfirmationCode } from '../../utils/createConfirmationCode';
 import { redis } from '../../redis';
 
 @ObjectType()
@@ -55,7 +55,7 @@ export class UserResolver {
             password: hashedPassword,
         }).save();
 
-        await sendEmail(email, await createConfirmationUrl(user.id));
+        await sendEmail(email, await createConfirmationCode(user.id));
         return user;
     }
 
@@ -65,13 +65,11 @@ export class UserResolver {
         @Arg('password') password: string
     ): Promise<any> {
         const user = await User.findOne({ where: { email } });
-
         if (!user) {
             throw new Error('Could not find user');
         }
 
         const verify = await bcrypt.compare(password, user.password);
-
         if (!verify) {
             throw new Error('Wrong password');
         }
@@ -90,13 +88,32 @@ export class UserResolver {
     @Mutation(() => Boolean)
     async confirmUser(@Arg('token') token: string): Promise<boolean> {
         const userId = await redis.get(token);
-
         if (!userId) {
             return false;
         }
 
         await User.update({ id: +userId }, { status: Status.Verified });
         await redis.del(token);
+
+        return true;
+    }
+
+    @Mutation(() => Boolean)
+    async generateVerificationCode(
+        @Arg('email') email: string,
+        @Arg('password') password: string
+    ): Promise<boolean> {
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        const verify = await bcrypt.compare(password, user.password);
+        if (!verify) {
+            return false;
+        }
+
+        await sendEmail(email, await createConfirmationCode(user.id));
 
         return true;
     }
