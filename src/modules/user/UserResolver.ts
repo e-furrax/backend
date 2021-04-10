@@ -9,12 +9,15 @@ import {
     Field,
 } from 'type-graphql';
 import * as bcrypt from 'bcryptjs';
-import { User } from '../../entities/User';
+import { Status, User } from '../../entities/User';
 import { RegisterInput } from './register/RegisterInput';
 import { isAuth } from '../../middlewares/isAuth';
 import { MyContext } from '../../types/MyContext';
 import { sign } from 'jsonwebtoken';
 import { UserInput } from './UserInput';
+import { sendEmail } from '../../utils/sendEmail';
+import { createConfirmationUrl } from '../../utils/createConfirmationUrl';
+import { redis } from '../../redis';
 
 @ObjectType()
 class LoginResponse {
@@ -52,6 +55,7 @@ export class UserResolver {
             password: hashedPassword,
         }).save();
 
+        await sendEmail(email, await createConfirmationUrl(user.id));
         return user;
     }
 
@@ -72,10 +76,28 @@ export class UserResolver {
             throw new Error('Wrong password');
         }
 
+        if (user.status < Status.Verified) {
+            throw new Error('Registration incomplete');
+        }
+
         return {
             accessToken: sign({ userId: user.id }, 's3cr3tk3y', {
                 expiresIn: '15m',
             }),
         };
+    }
+
+    @Mutation(() => Boolean)
+    async confirmUser(@Arg('token') token: string): Promise<boolean> {
+        const userId = await redis.get(token);
+
+        if (!userId) {
+            return false;
+        }
+
+        await User.update({ id: +userId }, { status: Status.Verified });
+        await redis.del(token);
+
+        return true;
     }
 }

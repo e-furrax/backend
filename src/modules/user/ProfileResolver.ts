@@ -4,9 +4,7 @@ import { MyContext } from '../../types/MyContext';
 import {
     Arg,
     Ctx,
-    Field,
     Mutation,
-    ObjectType,
     Query,
     Resolver,
     UseMiddleware,

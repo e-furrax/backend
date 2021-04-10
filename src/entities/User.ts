@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from 'type-graphql';
+import { ObjectType, Field, ID, registerEnumType } from 'type-graphql';
 import {
     BaseEntity,
     Column,
@@ -7,6 +7,17 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Rating } from './Rating';
+
+export enum Status {
+    Unverified,
+    Verified,
+    Incomplete,
+}
+
+registerEnumType(Status, {
+    name: 'Status',
+    description: 'The user statuses',
+});
 
 @ObjectType()
 @Entity()
@@ -36,4 +47,8 @@ export class User extends BaseEntity {
 
     @OneToMany(() => Rating, (rating) => rating.user)
     ratings: Rating[];
+
+    @Field(() => Status)
+    @Column('int', { default: 0 })
+    status: Status;
 }

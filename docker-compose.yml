@@ -13,6 +13,8 @@ services:
             - POSTGRES_PASSWORD=furrax
         volumes:
             - postgres:/var/lib/postgresql/data
+        networks:
+            - app-network
     node:
         image: 'node:12'
         working_dir: /home/node/app
@@ -28,6 +30,10 @@ services:
         depends_on:
             - postgres
             - mongo
+            - redis
+        networks:
+            - app-network
+
     mongo:
         container_name: mongo_container
         image: mongo:4.4.4
@@ -40,6 +46,20 @@ services:
             MONGO_INITDB_DATABASE: furrax
         volumes:
             - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+        networks:
+            - app-network
+
+    redis:
+        container_name: redis_container
+        image: redis:alpine
+        ports:
+            - '6379:6379'
+        networks:
+            - app-network
 
 volumes:
     postgres:
+
+networks:
+    app-network:
+        driver: bridge
