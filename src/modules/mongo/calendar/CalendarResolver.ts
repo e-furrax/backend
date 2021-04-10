@@ -18,12 +18,12 @@ import { AppointmentInput } from './AppointmentInput';
 export class CalendarResolver {
     @Query(() => [Calendar])
     async getCalendars() {
-        return await CalendarModel.find();
+        return CalendarModel.find();
     }
 
     @Query(() => Calendar, { nullable: true })
     async getCalendar(@Arg('data') data: CalendarInput) {
-        return await CalendarModel.findOne({ ...data });
+        return CalendarModel.findOne({ ...data });
     }
 
     @Mutation(() => Calendar)
@@ -48,13 +48,20 @@ export class CalendarResolver {
         @Ctx() { payload }: MyContext,
         @Arg('appointmentInput') { title }: AppointmentInput
     ): Promise<Calendar> {
+        const userId = payload?.userId;
+        if (!userId) {
+            return Promise.reject(new Error('Missing User ID'));
+        }
+        const isTitleAlreadyTaken = await AppointmentModel.findOne({
+            userId,
+            title,
+        }).then((appointment) => !!appointment);
+        if (isTitleAlreadyTaken) {
+            return Promise.reject(
+                new Error(`Title: ${title} is already taken`)
+            );
+        }
         return new Promise((resolve, reject) => {
-            const userId = payload?.userId;
-            if (!userId) {
-                reject(new Error('Missing User ID'));
-                return;
-            }
-
             CalendarModel.findOne(
                 { userId },
                 (err: any, calendar: DocumentType<Calendar> | null) => {

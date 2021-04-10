@@ -76,10 +76,8 @@ async function bootstrapPg() {
 
 async function bootstrapMongo() {
     try {
-        const mongoose = await connect(
-            'mongodb://furrax:furrax@mongo_container/furrax'
-        );
-        await mongoose.connection.db.dropDatabase();
+        await connect('mongodb://furrax:furrax@mongo_container:27017/furrax');
+        // await mongoose.connection.db.dropDatabase();
 
         const schema = await TypeGraphQL.buildSchema({
             resolvers: MongoResolvers,
