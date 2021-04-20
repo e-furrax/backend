@@ -1,6 +1,5 @@
 {
     "dependencies": {
-        "@typegoose/typegoose": "^7.4.8",
         "apollo-server": "^2.21.0",
         "apollo-server-express": "^2.21.0",
         "aws-sdk": "^2.874.0",

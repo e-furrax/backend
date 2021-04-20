@@ -15,6 +15,7 @@
         "entities": ["dist/entities/mongo/*.js"],
         "url":"mongodb://furrax:furrax@mongo_container:27017/furrax",
         "logger": "advanced-console",
-        "logging": true
+        "logging": true,
+        "useUnifiedTopology": true
     }
 ]

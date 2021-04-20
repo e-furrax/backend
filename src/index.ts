@@ -5,8 +5,7 @@ import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
 import * as path from 'path';
-
-import { MongoResolvers } from './modules';
+import Container from 'typedi';
 import {
     Builder,
     fixturesIterator,
@@ -14,10 +13,9 @@ import {
     Parser,
     Resolver,
 } from 'typeorm-fixtures-cli/dist';
-import { PostgresResolvers } from '@/modules';
-import { buildSchema } from 'type-graphql';
+
 import { graphqlUploadExpress } from 'graphql-upload';
-import Container from 'typedi';
+import { MongoResolvers, PostgresResolvers } from '@/modules';
 
 const postgresApp = express();
 const mongoApp = express();
@@ -43,7 +41,7 @@ async function bootstrapPg() {
                 .save(entity);
         }
 
-        const schema = await buildSchema({
+        const schema = await TypeGraphQL.buildSchema({
             resolvers: PostgresResolvers,
             container: Container,
         });
