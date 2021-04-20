@@ -1,12 +1,10 @@
-import { User } from '../../entities/User';
-import { isAuth } from '../../middlewares/isAuth';
-import { MyContext } from '../../types/MyContext';
+import { User } from '@/entities/postgres/User';
+import { isAuth } from '@/middlewares/isAuth';
+import { MyContext } from '@/types/MyContext';
 import {
     Arg,
     Ctx,
-    Field,
     Mutation,
-    ObjectType,
     Query,
     Resolver,
     UseMiddleware,
@@ -14,9 +12,9 @@ import {
 import { UpdateProfileInput } from './ProfileInput';
 import * as bcrypt from 'bcryptjs';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
-import { avatarUploader } from '../../uploaders';
+import { avatarUploader } from '@/libs/gql-uploaders';
 
-@Resolver()
+@Resolver(() => User)
 export class ProfileResolver {
     @Query(() => User)
     @UseMiddleware(isAuth)

@@ -1,13 +1,11 @@
 import 'module-alias/register';
 import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
-import { connect } from 'mongoose';
 import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
 import * as path from 'path';
 
-import { PostgresModels } from './entities';
 import { MongoResolvers } from './modules';
 import {
     Builder,
@@ -16,8 +14,10 @@ import {
     Parser,
     Resolver,
 } from 'typeorm-fixtures-cli/dist';
-import { createSchema } from './utils/createSchema';
+import { PostgresResolvers } from '@/modules';
+import { buildSchema } from 'type-graphql';
 import { graphqlUploadExpress } from 'graphql-upload';
+import Container from 'typedi';
 
 const postgresApp = express();
 const mongoApp = express();
@@ -26,16 +26,8 @@ const GQLpath = '/graphql';
 
 async function bootstrapPg() {
     try {
-        const connection = await TypeORM.createConnection({
-            type: 'postgres',
-            url: 'postgres://furrax:furrax@postgres_container/furrax',
-            entities: PostgresModels,
-            synchronize: true,
-            logger: 'advanced-console',
-            logging: true,
-            dropSchema: true,
-            cache: true,
-        });
+        const connection = await TypeORM.createConnection('postgres');
+        Container.set({ id: 'POSTGRES_MANAGER', factory: () => connection });
 
         const loader = new Loader();
         loader.load(path.resolve('./src/fixtures'));
@@ -46,11 +38,15 @@ async function bootstrapPg() {
 
         for (const fixture of fixturesIterator(fixtures)) {
             const entity = await builder.build(fixture);
-            await TypeORM.getRepository(entity.constructor.name).save(entity);
+            await connection
+                .getRepository(entity.constructor.name)
+                .save(entity);
         }
 
-        const schema = await createSchema();
-
+        const schema = await buildSchema({
+            resolvers: PostgresResolvers,
+            container: Container,
+        });
         const server = new ApolloServer({
             schema,
             context: ({ req, res }) => ({ req, res }),
@@ -76,11 +72,12 @@ async function bootstrapPg() {
 
 async function bootstrapMongo() {
     try {
-        await connect('mongodb://furrax:furrax@mongo_container:27017/furrax');
-        // await mongoose.connection.db.dropDatabase();
+        const connection = await TypeORM.createConnection('mongodb');
+        Container.set({ id: 'MONGO_MANAGER', factory: () => connection });
 
         const schema = await TypeGraphQL.buildSchema({
             resolvers: MongoResolvers,
+            container: Container,
         });
 
         const server = new ApolloServer({
@@ -107,4 +104,6 @@ bootstrapPg()
         console.log(err);
     });
 
-bootstrapMongo();
+bootstrapMongo().catch((err) => {
+    console.log(err);
+});

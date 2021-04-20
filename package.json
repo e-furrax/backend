@@ -53,6 +53,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
+        "typeorm": "ts-node-dev ./node_modules/typorm/cli.js",
         "test": "jest",
         "start": "node dist/index.js",
         "watch": "tsc -w",

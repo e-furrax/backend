@@ -1,13 +1,14 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { S3 } from 'aws-sdk';
+import s3 from '@/configs/s3';
 
-export const uuidFilenameTransform = (filename = ''): string => {
+const uuidFilenameTransform = (filename = ''): string => {
     const fileExt = path.extname(filename);
     return `${uuidv4()}${fileExt}`;
 };
 
-export class S3Uploader {
+class S3Uploader {
     private _s3: S3;
     private _baseKey: string;
     private _filenameTransform: any;
@@ -49,3 +50,12 @@ export class S3Uploader {
         return Location;
     }
 }
+
+export const avatarUploader = new S3Uploader(s3, {
+    baseKey: 'users/avatars',
+    uploadParams: {
+        CacheControl: 'max-age:31536000',
+        ContentDisposition: 'inline',
+    },
+    filenameTransform: (filename: string) => filename,
+});

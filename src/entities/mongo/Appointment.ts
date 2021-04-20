@@ -1,28 +1,33 @@
-import { ObjectId } from 'mongodb';
-import { prop as Property, getModelForClass } from '@typegoose/typegoose';
 import { Field, ID, ObjectType } from 'type-graphql';
+import { Column, Entity, ObjectIdColumn, ObjectID } from 'typeorm';
 import { Transaction } from './Transaction';
-import { Calendar } from './Calendar';
 
 @ObjectType()
+@Entity()
 export class Appointment {
     @Field(() => ID)
-    readonly _id: ObjectId;
+    @ObjectIdColumn()
+    readonly _id: ObjectID;
 
     @Field()
-    @Property({ required: true })
+    @Column({ nullable: false })
+    public userId: number;
+
+    @Field()
+    @Column()
     public title: string;
 
-    @Field(() => Calendar)
-    @Property({ ref: 'Calendar', required: true })
-    public calendar: Calendar | ObjectId;
-
     @Field()
-    @Property({ default: new Date(), required: true })
+    @Column({ default: new Date(), nullable: false })
     public date: Date;
 
     @Field(() => [Transaction])
-    @Property({ type: () => Transaction, default: [] })
+    @Column(() => Transaction)
     public transactions: Transaction[];
+
+    constructor(userId: number, title: string) {
+        this.userId = userId;
+        this.title = title;
+        this.transactions = [];
+    }
 }
-export const AppointmentModel = getModelForClass(Appointment);

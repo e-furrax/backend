@@ -1,30 +1,31 @@
-import { ObjectId } from 'mongodb';
-import { prop as Property, getModelForClass } from '@typegoose/typegoose';
-import { ObjectType, Field, ID } from 'type-graphql';
-import { Appointment } from './Appointment';
+import { Field, ID, ObjectType } from 'type-graphql';
+import { Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm';
 @ObjectType()
+@Entity()
 export class Transaction {
     @Field(() => ID)
-    readonly _id: ObjectId;
+    @ObjectIdColumn()
+    readonly _id: ObjectID;
 
     @Field()
-    @Property({ required: true })
+    @Column()
     public price: number;
 
     @Field()
-    @Property({ default: new Date(), required: true })
+    @Column()
     public date: Date;
 
     @Field()
-    @Property({ default: 'PENDING', required: true })
+    @Column({ default: 'PENDING' })
     public status: string;
 
-    @Field(() => Appointment)
-    @Property({ ref: 'Appointment', required: true })
-    public appointment: Appointment | ObjectId;
-
-    @Field({ nullable: true })
-    @Property()
+    @Field()
+    @Column({ nullable: true })
     public description?: string;
+
+    constructor(price: number, description: string, date = new Date()) {
+        this.price = price;
+        this.date = date;
+        this.description = description;
+    }
 }
-export const TransactionModel = getModelForClass(Transaction);
