@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcryptjs';
 import {
     Resolver,
     Mutation,
@@ -8,15 +9,16 @@ import {
     ObjectType,
     Field,
 } from 'type-graphql';
-import * as bcrypt from 'bcryptjs';
-import { User } from '@/entities/postgres/User';
-import { RegisterInput } from './register/RegisterInput';
-import { isAuth } from '@/middlewares/isAuth';
-import { MyContext } from '@/types/MyContext';
-import { sign } from 'jsonwebtoken';
-import { UserInput } from './UserInput';
-import { PostgresService } from '@/services/postgres-service';
 import { Repository } from 'typeorm';
+import { Service } from 'typedi';
+import { sign } from 'jsonwebtoken';
+
+import { MyContext } from '@/types/MyContext';
+import { isAuth } from '@/middlewares/isAuth';
+import { PostgresService } from '@/services/postgres-service';
+import { User } from '@/entities/postgres/User';
+import { UserInput } from './UserInput';
+import { RegisterInput } from './register/RegisterInput';
 
 @ObjectType()
 class LoginResponse {
@@ -25,6 +27,7 @@ class LoginResponse {
 }
 
 @Resolver(() => User)
+@Service()
 export class UserResolver {
     private repository: Repository<User>;
 
@@ -54,13 +57,12 @@ export class UserResolver {
     ): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        const user = await this.repository
-            .create({
-                username,
-                email,
-                password: hashedPassword,
-            })
-            .save();
+        const user = await this.repository.create({
+            username,
+            email,
+            password: hashedPassword,
+        });
+        await this.repository.save(user);
 
         return user;
     }

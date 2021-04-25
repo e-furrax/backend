@@ -4,36 +4,22 @@ import {
     ValidatorConstraint,
     ValidatorConstraintInterface,
 } from 'class-validator';
+import { Service } from 'typedi';
+import { Repository } from 'typeorm';
+import { PostgresService } from '@/services/postgres-service';
 import { User } from '@/entities/postgres/User';
 
-@ValidatorConstraint({ async: true })
-export class IsUsernameAlreadyUsedConstraint
-    implements ValidatorConstraintInterface {
-    validate(username: string) {
-        return User.findOne({ where: { username } }).then((user) => {
-            if (user) return false;
-            return true;
-        });
-    }
-}
-
-export function IsUsernameAlreadyUsed(validationOptions?: ValidationOptions) {
-    return function (object: Record<string, any>, propertyName: string) {
-        registerDecorator({
-            target: object.constructor,
-            propertyName: propertyName,
-            options: validationOptions,
-            constraints: [],
-            validator: IsUsernameAlreadyUsedConstraint,
-        });
-    };
-}
-
+@Service()
 @ValidatorConstraint({ async: true })
 export class IsEmailAlreadyUsedConstraint
     implements ValidatorConstraintInterface {
+    private repository: Repository<User>;
+
+    constructor(private readonly postgresService: PostgresService) {
+        this.repository = this.postgresService.getRepository(User);
+    }
     validate(email: string) {
-        return User.findOne({ where: { email } }).then((user) => {
+        return this.repository.findOne({ where: { email } }).then((user) => {
             if (user) return false;
             return true;
         });

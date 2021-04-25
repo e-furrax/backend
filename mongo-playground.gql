@@ -1,0 +1,41 @@
+# Write your query or mutation here
+query Get {
+  getAppointments {
+    _id
+    userId
+    title
+    _createdAt
+    transactions {
+      price
+    }
+  }
+}
+
+mutation CreateAppointment {
+  createAppointment(title: { title: "uniquefyfy" }) {
+    userId
+    title
+    _updatedAt
+    _createdAt
+    transactions {
+      price
+    }
+  }
+}
+
+mutation CreateTransaction(
+  $transactionInput: TransactionInput!
+  $appointmentId: String!
+) {
+  addTransaction(
+    transactionInput: $transactionInput
+    appointmentId: $appointmentId
+  ) {
+    _updatedAt
+    title
+    transactions {
+      _id
+      price
+    }
+  }
+}

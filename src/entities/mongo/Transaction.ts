@@ -1,19 +1,30 @@
+import { ObjectId } from 'mongodb';
 import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm';
+import {
+    Column,
+    Entity,
+    ObjectIdColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+} from 'typeorm';
 @ObjectType()
 @Entity()
 export class Transaction {
     @Field(() => ID)
     @ObjectIdColumn()
-    readonly _id: ObjectID;
+    readonly _id: ObjectId;
+
+    @Field()
+    @CreateDateColumn()
+    _createdAt: Date;
+
+    @Field()
+    @UpdateDateColumn()
+    _updatedAt: Date;
 
     @Field()
     @Column()
-    public price: number;
-
-    @Field()
-    @Column()
-    public date: Date;
+    readonly price: number;
 
     @Field()
     @Column({ default: 'PENDING' })
@@ -23,9 +34,8 @@ export class Transaction {
     @Column({ nullable: true })
     public description?: string;
 
-    constructor(price: number, description: string, date = new Date()) {
+    constructor(price: number, description: string) {
         this.price = price;
-        this.date = date;
         this.description = description;
     }
 }

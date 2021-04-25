@@ -4,17 +4,10 @@ import { ApolloServer } from 'apollo-server-express';
 import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
-import * as path from 'path';
-import Container from 'typedi';
-import {
-    Builder,
-    fixturesIterator,
-    Loader,
-    Parser,
-    Resolver,
-} from 'typeorm-fixtures-cli/dist';
+import { Container } from 'typedi';
 
 import { graphqlUploadExpress } from 'graphql-upload';
+import { loadFixtures } from '@/utils/loadFixtures';
 import { MongoResolvers, PostgresResolvers } from '@/modules';
 
 const postgresApp = express();
@@ -25,26 +18,14 @@ const GQLpath = '/graphql';
 async function bootstrapPg() {
     try {
         const connection = await TypeORM.createConnection('postgres');
-        Container.set({ id: 'POSTGRES_MANAGER', factory: () => connection });
-
-        const loader = new Loader();
-        loader.load(path.resolve('./src/fixtures'));
-
-        const resolver = new Resolver();
-        const fixtures = resolver.resolve(loader.fixtureConfigs);
-        const builder = new Builder(connection, new Parser());
-
-        for (const fixture of fixturesIterator(fixtures)) {
-            const entity = await builder.build(fixture);
-            await connection
-                .getRepository(entity.constructor.name)
-                .save(entity);
-        }
+        Container.set('POSTGRES_MANAGER', connection);
 
         const schema = await TypeGraphQL.buildSchema({
             resolvers: PostgresResolvers,
             container: Container,
         });
+
+        await loadFixtures(connection);
         const server = new ApolloServer({
             schema,
             context: ({ req, res }) => ({ req, res }),
@@ -71,7 +52,7 @@ async function bootstrapPg() {
 async function bootstrapMongo() {
     try {
         const connection = await TypeORM.createConnection('mongodb');
-        Container.set({ id: 'MONGO_MANAGER', factory: () => connection });
+        Container.set('MONGO_MANAGER', connection);
 
         const schema = await TypeGraphQL.buildSchema({
             resolvers: MongoResolvers,
@@ -94,13 +75,9 @@ async function bootstrapMongo() {
         console.error(err);
     }
 }
-bootstrapPg()
-    .then(() => {
-        console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.');
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+bootstrapPg().catch((err) => {
+    console.log(err);
+});
 
 bootstrapMongo().catch((err) => {
     console.log(err);

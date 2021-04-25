@@ -6,7 +6,7 @@
         "entities": ["dist/entities/postgres/*.js"],
         "synchronize": true,
         "logger": "advanced-console",
-        "logging": true,
+        "logging": false,
         "dropSchema": true
     },
     {

@@ -1,6 +1,6 @@
-import { User } from '@/entities/postgres/User';
-import { isAuth } from '@/middlewares/isAuth';
-import { MyContext } from '@/types/MyContext';
+import * as bcrypt from 'bcryptjs';
+import { Service } from 'typedi';
+import { Repository } from 'typeorm';
 import {
     Arg,
     Ctx,
@@ -9,17 +9,28 @@ import {
     Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { UpdateProfileInput } from './ProfileInput';
-import * as bcrypt from 'bcryptjs';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
-import { avatarUploader } from '@/libs/gql-uploaders';
+import { PostgresService } from '@/services/postgres-service';
 
+import { MyContext } from '@/types/MyContext';
+import { avatarUploader } from '@/libs/gql-uploaders';
+import { isAuth } from '@/middlewares/isAuth';
+import { User } from '@/entities/postgres/User';
+import { UpdateProfileInput } from './ProfileInput';
+
+@Service()
 @Resolver(() => User)
 export class ProfileResolver {
+    private repository: Repository<User>;
+
+    constructor(private readonly postgresService: PostgresService) {
+        this.repository = this.postgresService.getRepository(User);
+    }
+
     @Query(() => User)
     @UseMiddleware(isAuth)
     async getProfile(@Ctx() { payload }: MyContext): Promise<User | undefined> {
-        return await User.findOne(payload?.userId);
+        return await this.repository.findOne(payload?.userId);
     }
 
     @Mutation(() => User)
@@ -28,14 +39,12 @@ export class ProfileResolver {
         @Ctx() { payload }: MyContext,
         @Arg('data') data: UpdateProfileInput
     ): Promise<User> {
-        const user = await User.findOne(payload?.userId);
+        const user = await this.repository.findOne(payload?.userId);
         if (!user) {
             throw new Error("Your profile couldn't be found");
         }
         Object.assign(user, data);
-        await user.save();
-
-        return user;
+        return this.repository.save(user);
     }
 
     @Mutation(() => Boolean)
@@ -46,7 +55,7 @@ export class ProfileResolver {
         @Arg('newPassword') newPassword: string
     ): Promise<boolean> {
         const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-        const user = await User.findOne(payload?.userId);
+        const user = await this.repository.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
         }
@@ -59,7 +68,7 @@ export class ProfileResolver {
 
         user.password = hashedNewPassword;
 
-        await user.save();
+        await this.repository.save(user);
 
         return true;
     }
@@ -71,7 +80,7 @@ export class ProfileResolver {
         @Arg('picture', () => GraphQLUpload)
         { createReadStream, filename, mimetype }: FileUpload
     ): Promise<boolean> {
-        const user = await User.findOne(payload?.userId);
+        const user = await this.repository.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
         }
@@ -82,7 +91,7 @@ export class ProfileResolver {
         });
 
         user.profileImage = uri;
-        user.save();
+        await this.repository.save(user);
 
         return true;
     }

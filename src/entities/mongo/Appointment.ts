@@ -1,5 +1,12 @@
+import { ObjectId } from 'mongodb';
 import { Field, ID, ObjectType } from 'type-graphql';
-import { Column, Entity, ObjectIdColumn, ObjectID } from 'typeorm';
+import {
+    Column,
+    Entity,
+    ObjectIdColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+} from 'typeorm';
 import { Transaction } from './Transaction';
 
 @ObjectType()
@@ -7,7 +14,15 @@ import { Transaction } from './Transaction';
 export class Appointment {
     @Field(() => ID)
     @ObjectIdColumn()
-    readonly _id: ObjectID;
+    readonly _id: ObjectId;
+
+    @Field()
+    @CreateDateColumn()
+    _createdAt: Date;
+
+    @Field()
+    @UpdateDateColumn()
+    _updatedAt: Date;
 
     @Field()
     @Column({ nullable: false })
@@ -16,10 +31,6 @@ export class Appointment {
     @Field()
     @Column()
     public title: string;
-
-    @Field()
-    @Column({ default: new Date(), nullable: false })
-    public date: Date;
 
     @Field(() => [Transaction])
     @Column(() => Transaction)
