@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcryptjs';
 import {
     Resolver,
     Mutation,
@@ -8,13 +9,16 @@ import {
     ObjectType,
     Field,
 } from 'type-graphql';
-import * as bcrypt from 'bcryptjs';
-import { User } from '../../entities/User';
-import { RegisterInput } from './register/RegisterInput';
-import { isAuth } from '../../middlewares/isAuth';
-import { MyContext } from '../../types/MyContext';
+import { Repository } from 'typeorm';
+import { Service } from 'typedi';
 import { sign } from 'jsonwebtoken';
+
+import { MyContext } from '@/types/MyContext';
+import { isAuth } from '@/middlewares/isAuth';
+import { PostgresService } from '@/services/postgres-service';
+import { User } from '@/entities/postgres/User';
 import { UserInput } from './UserInput';
+import { RegisterInput } from './register/RegisterInput';
 
 @ObjectType()
 class LoginResponse {
@@ -22,16 +26,23 @@ class LoginResponse {
     accessToken: string;
 }
 
-@Resolver()
+@Resolver(() => User)
+@Service()
 export class UserResolver {
+    private repository: Repository<User>;
+
+    constructor(private readonly postgresService: PostgresService) {
+        this.repository = this.postgresService.getRepository(User);
+    }
+
     @Query(() => [User])
     async getUsers() {
-        return await User.find();
+        return await this.repository.find();
     }
 
     @Query(() => User, { nullable: true })
     async getUser(@Arg('data') data: UserInput) {
-        return await User.findOne({ ...data });
+        return await this.repository.findOne({ ...data });
     }
 
     @Query(() => String)
@@ -46,11 +57,12 @@ export class UserResolver {
     ): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        const user = await User.create({
+        const user = await this.repository.create({
             username,
             email,
             password: hashedPassword,
-        }).save();
+        });
+        await this.repository.save(user);
 
         return user;
     }
@@ -60,7 +72,7 @@ export class UserResolver {
         @Arg('email') email: string,
         @Arg('password') password: string
     ): Promise<any> {
-        const user = await User.findOne({ where: { email } });
+        const user = await this.repository.findOne({ where: { email } });
 
         if (!user) {
             throw new Error('Could not find user');

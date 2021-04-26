@@ -1,0 +1,21 @@
+[
+    {
+        "name": "postgres",
+        "type": "postgres",
+        "url": "postgres://furrax:furrax@postgres_container/furrax",
+        "entities": ["dist/entities/postgres/*.js"],
+        "synchronize": true,
+        "logger": "advanced-console",
+        "logging": false,
+        "dropSchema": true
+    },
+    {
+        "name": "mongodb",
+        "type": "mongodb",
+        "entities": ["dist/entities/mongo/*.js"],
+        "url":"mongodb://furrax:furrax@mongo_container:27017/furrax",
+        "logger": "advanced-console",
+        "logging": true,
+        "useUnifiedTopology": true
+    }
+]
