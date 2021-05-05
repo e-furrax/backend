@@ -12,7 +12,7 @@ import { DeleteWriteOpResultObject, MongoRepository } from 'typeorm';
 
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
-import { MongoService } from '@/services/mongo-manager';
+import { MongoService } from '@/services/mongo-service';
 
 import { Appointment } from '@/entities/mongo/Appointment';
 import { Transaction } from '@/entities/mongo/Transaction';
@@ -24,24 +24,30 @@ import {
 @Service()
 @Resolver(() => Appointment)
 export class AppointmentResolver {
-    private repository: MongoRepository<Appointment>;
+    private repositoryAppointment: MongoRepository<Appointment>;
+    private repositoryTransaction: MongoRepository<Transaction>;
 
     constructor(private readonly mongoService: MongoService) {
-        this.repository = this.mongoService.getRepository(Appointment);
+        this.repositoryAppointment = this.mongoService.getRepository(
+            Appointment
+        );
+        this.repositoryTransaction = this.mongoService.getRepository(
+            Transaction
+        );
     }
     @Query(() => [Appointment])
     async getAppointments(): Promise<Appointment[]> {
-        return this.repository.find();
+        return this.repositoryAppointment.find();
     }
 
-    @Query(() => Appointment, { nullable: true })
+    @Query(() => [Appointment], { nullable: true })
     async getAppointmentsByUser(
         @Arg('userId') userId: number
     ): Promise<Appointment[]> {
         if (!userId) {
             return Promise.reject(new Error('Missing User ID'));
         }
-        return this.repository.find({ userId });
+        return this.repositoryAppointment.find({ userId });
     }
 
     @Mutation(() => Appointment)
@@ -56,7 +62,7 @@ export class AppointmentResolver {
         }
 
         const appointment = new Appointment(userId, title);
-        return this.repository.save(appointment);
+        return this.repositoryAppointment.save(appointment);
     }
 
     @Mutation(() => Appointment)
@@ -71,11 +77,14 @@ export class AppointmentResolver {
             return Promise.reject(new Error('Missing User ID'));
         }
         const _id = ObjectId.createFromHexString(id);
-        const result = await this.repository.findOneAndUpdate(
+        const transaction = await this.repositoryTransaction.save(
+            new Transaction(price, description)
+        );
+        const result = await this.repositoryAppointment.findOneAndUpdate(
             { _id, userId },
             {
                 $push: {
-                    transactions: new Transaction(price, description),
+                    transactions: transaction,
                 },
             },
             { returnOriginal: false }
@@ -100,12 +109,15 @@ export class AppointmentResolver {
             return Promise.reject(new Error('Missing User ID in Context'));
         }
         const _id = ObjectId.createFromHexString(id);
-        const appointment = await this.repository.findOne({ _id, userId });
+        const appointment = await this.repositoryAppointment.findOne({
+            _id,
+            userId,
+        });
         if (!appointment) {
             return Promise.reject(
                 new Error(`No Appointment ID ${_id} for User ID ${userId}`)
             );
         }
-        return this.repository.deleteOne(appointment);
+        return this.repositoryAppointment.deleteOne(appointment);
     }
 }
