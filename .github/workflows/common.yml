@@ -15,9 +15,18 @@ jobs:
       - name: Build
         run: yarn run build
 
+      - name: Create artifact directory
+        run: mkdir -p artifact
+
+      - name: Copy dist to artifact
+        run: cp -r dist artifact
+
+      - name: Copy package
+        run: cp package.json artifact && cp package-lock.json artifact
+
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist
-          path: dist
+          name: artifact
+          path: artifact
           retention-days: 4

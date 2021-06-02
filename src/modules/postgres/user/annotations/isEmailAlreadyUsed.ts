@@ -12,7 +12,8 @@ import { User } from '@/entities/postgres/User';
 @Service()
 @ValidatorConstraint({ async: true })
 export class IsEmailAlreadyUsedConstraint
-    implements ValidatorConstraintInterface {
+    implements ValidatorConstraintInterface
+{
     private repository: Repository<User>;
 
     constructor(private readonly postgresService: PostgresService) {
