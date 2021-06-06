@@ -9,7 +9,7 @@ import {
     Field,
 } from 'type-graphql';
 import * as bcrypt from 'bcryptjs';
-import { Status, User } from '../../entities/User';
+import { Status, User } from '../../entities/postgres/User';
 import { RegisterInput } from './register/RegisterInput';
 import { isAuth } from '../../middlewares/isAuth';
 import { MyContext } from '../../types/MyContext';

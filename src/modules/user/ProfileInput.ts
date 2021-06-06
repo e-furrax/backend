@@ -1,4 +1,4 @@
-import { User } from '../../entities/User';
+import { User } from '../../entities/postgres/User';
 import { InputType, Field } from 'type-graphql';
 
 @InputType()

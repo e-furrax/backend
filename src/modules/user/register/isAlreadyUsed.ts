@@ -4,11 +4,12 @@ import {
     ValidatorConstraint,
     ValidatorConstraintInterface,
 } from 'class-validator';
-import { User } from '../../../entities/User';
+import { User } from '../../../entities/postgres/User';
 
 @ValidatorConstraint({ async: true })
 export class IsUsernameAlreadyUsedConstraint
-    implements ValidatorConstraintInterface {
+    implements ValidatorConstraintInterface
+{
     validate(username: string) {
         return User.findOne({ where: { username } }).then((user) => {
             if (user) return false;
@@ -31,7 +32,8 @@ export function IsUsernameAlreadyUsed(validationOptions?: ValidationOptions) {
 
 @ValidatorConstraint({ async: true })
 export class IsEmailAlreadyUsedConstraint
-    implements ValidatorConstraintInterface {
+    implements ValidatorConstraintInterface
+{
     validate(email: string) {
         return User.findOne({ where: { email } }).then((user) => {
             if (user) return false;
