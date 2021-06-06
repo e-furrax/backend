@@ -16,16 +16,19 @@ jobs:
         run: yarn run build
 
       - name: Create artifact directory
-        run: mkdir -p artifact/dist/src
+        run: mkdir -p artifact/src
 
       - name: Copy dist to artifact
         run: cp -r dist artifact
+
+      - name: Copy ormconfig
+        run: cp ormconfig.js artifact
 
       - name: Copy package
         run: cp package.json artifact && cp package-lock.json artifact
 
       - name: Copy fixtures
-        run: cp -r src/fixtures artifact/dist/src
+        run: cp -r src/fixtures artifact/src
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2
