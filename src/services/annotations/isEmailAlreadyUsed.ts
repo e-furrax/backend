@@ -4,9 +4,8 @@ import {
     ValidatorConstraint,
     ValidatorConstraintInterface,
 } from 'class-validator';
-import { Service } from 'typedi';
-import { Repository } from 'typeorm';
-import { PostgresService } from '@/services/postgres-service';
+import { Container, Service } from 'typedi';
+import { Connection } from 'typeorm';
 import { User } from '@/entities/postgres/User';
 
 @Service()
@@ -14,16 +13,15 @@ import { User } from '@/entities/postgres/User';
 export class IsEmailAlreadyUsedConstraint
     implements ValidatorConstraintInterface
 {
-    private repository: Repository<User>;
-
-    constructor(private readonly postgresService: PostgresService) {
-        this.repository = this.postgresService.getRepository(User);
-    }
     validate(email: string) {
-        return this.repository.findOne({ where: { email } }).then((user) => {
-            if (user) return false;
-            return true;
-        });
+        const postgres = Container.get('POSTGRES_MANAGER') as Connection;
+        return postgres
+            .getRepository(User)
+            .findOne({ where: { email } })
+            .then((user) => {
+                if (user) return false;
+                return true;
+            });
     }
 }
 

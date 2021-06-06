@@ -15,7 +15,7 @@ import { sign } from 'jsonwebtoken';
 
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
-import { PostgresService } from '@/services/postgres-service';
+import { PostgresService } from '@/services/repositories/postgres-service';
 import { User } from '@/entities/postgres/User';
 import { UserInput } from './UserInput';
 import { RegisterInput } from './register/RegisterInput';

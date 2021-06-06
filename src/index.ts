@@ -41,7 +41,7 @@ async function bootstrapPg() {
 
         postgresApp.listen(3000, () => {
             console.log(
-                'Server is running, GraphQL Playground available at http://localhost:3000/graphql'
+                'Postgres Server is running, GraphQL Playground available at http://localhost:3000/graphql'
             );
         });
     } catch (err) {
@@ -68,7 +68,7 @@ async function bootstrapMongo() {
 
         mongoApp.listen(4000, () => {
             console.log(
-                'Server is running, GraphQL Playground available at http://localhost:4000/graphql'
+                'Mongo Server is running, GraphQL Playground available at http://localhost:4000/graphql'
             );
         });
     } catch (err) {

@@ -25,8 +25,12 @@ export class Appointment {
     _updatedAt: Date;
 
     @Field()
-    @Column({ nullable: false })
-    public userId: number;
+    @Column()
+    public from: number;
+
+    @Field()
+    @Column()
+    public to: number;
 
     @Field()
     @Column()
@@ -36,8 +40,9 @@ export class Appointment {
     @Column(() => Transaction)
     public transactions: Transaction[];
 
-    constructor(userId: number, title: string) {
-        this.userId = userId;
+    constructor(from: number, to: number, title: string) {
+        this.from = from;
+        this.to = to;
         this.title = title;
         this.transactions = [];
     }

@@ -10,7 +10,7 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
-import { PostgresService } from '@/services/postgres-service';
+import { PostgresService } from '@/services/repositories/postgres-service';
 
 import { MyContext } from '@/types/MyContext';
 import { avatarUploader } from '@/libs/gql-uploaders';

@@ -7,6 +7,14 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
 } from 'typeorm';
+
+enum Status {
+    PENDING = 'PENDING',
+    ACCEPTED = 'ACCEPTED',
+    REJECTED = 'REJECTED',
+    CANCELLED = 'CANCELLED',
+}
+
 @ObjectType()
 @Entity()
 export class Transaction {
@@ -27,15 +35,16 @@ export class Transaction {
     readonly price: number;
 
     @Field()
-    @Column({ default: 'PENDING' })
-    public status: string;
+    @Column('string')
+    public status: Status;
 
     @Field()
     @Column({ nullable: true })
     public description?: string;
 
-    constructor(price: number, description: string) {
+    constructor(price: number, description: string, status = Status.PENDING) {
         this.price = price;
         this.description = description;
+        this.status = status;
     }
 }
