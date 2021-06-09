@@ -30,18 +30,18 @@ export class User extends BaseEntity {
     @Column('text', { unique: true })
     email: string;
 
-    @Field()
-    @Column('text', { unique: true })
+    @Field({ nullable: true })
+    @Column('text', { unique: true, nullable: true })
     username: string;
 
-    @Field()
+    @Field({ nullable: true })
     @Column('varchar', { nullable: true })
     description: string;
 
     @Column()
     password: string;
 
-    @Field()
+    @Field({ nullable: true })
     @Column('text', { nullable: true })
     profileImage: string;
 

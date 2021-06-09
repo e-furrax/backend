@@ -1,4 +1,4 @@
-import { User } from '../../entities/postgres/User';
+import { User } from '../../entities/User';
 import { isAuth } from '../../middlewares/isAuth';
 import { MyContext } from '../../types/MyContext';
 import {

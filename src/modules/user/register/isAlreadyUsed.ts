@@ -4,7 +4,7 @@ import {
     ValidatorConstraint,
     ValidatorConstraintInterface,
 } from 'class-validator';
-import { User } from '../../../entities/postgres/User';
+import { User } from '../../../entities/User';
 
 @ValidatorConstraint({ async: true })
 export class IsUsernameAlreadyUsedConstraint

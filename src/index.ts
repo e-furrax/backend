@@ -8,10 +8,11 @@ import * as path from 'path';
 import session from 'express-session';
 import { redis } from './redis';
 import connectRedis from 'connect-redis';
+// import cors from 'cors';
 
-import { User } from './entities/postgres/User';
+import { User } from './entities/User';
 import { Game } from './entities/Game';
-import { Rating } from './entities/postgres/Rating';
+import { Rating } from './entities/Rating';
 import { CalendarResolver } from './modules/calendar/CalendarResolver';
 import {
     Builder,

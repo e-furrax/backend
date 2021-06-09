@@ -9,7 +9,7 @@ import {
     Field,
 } from 'type-graphql';
 import * as bcrypt from 'bcryptjs';
-import { Status, User } from '../../entities/postgres/User';
+import { Status, User } from '../../entities/User';
 import { RegisterInput } from './register/RegisterInput';
 import { isAuth } from '../../middlewares/isAuth';
 import { MyContext } from '../../types/MyContext';
@@ -45,12 +45,11 @@ export class UserResolver {
 
     @Mutation(() => User)
     async register(
-        @Arg('data') { email, password, username }: RegisterInput
+        @Arg('data') { email, password }: RegisterInput
     ): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 12);
 
         const user = await User.create({
-            username,
             email,
             password: hashedPassword,
         }).save();
@@ -86,14 +85,15 @@ export class UserResolver {
     }
 
     @Mutation(() => Boolean)
-    async confirmUser(@Arg('token') token: string): Promise<boolean> {
-        const userId = await redis.get(token);
+    async confirmUser(@Arg('code') code: string): Promise<boolean> {
+        const userId = await redis.get(code);
+
         if (!userId) {
             return false;
         }
 
         await User.update({ id: +userId }, { status: Status.Verified });
-        await redis.del(token);
+        await redis.del(code);
 
         return true;
     }
