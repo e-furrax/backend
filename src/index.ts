@@ -5,6 +5,7 @@ import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
 import { Container } from 'typedi';
+import http from 'http';
 
 import { graphqlUploadExpress } from 'graphql-upload';
 import { loadFixtures } from '@/utils/loadFixtures';
@@ -30,6 +31,9 @@ async function bootstrapPg() {
             schema,
             context: ({ req, res }) => ({ req, res }),
             uploads: false,
+            subscriptions: {
+                onConnect: () => console.log('Connected to websocket'),
+            },
         });
 
         postgresApp.use(
@@ -39,7 +43,10 @@ async function bootstrapPg() {
 
         server.applyMiddleware({ app: postgresApp, path: GQLpath });
 
-        postgresApp.listen(3000, () => {
+        const httpServer = http.createServer(postgresApp);
+        server.installSubscriptionHandlers(httpServer);
+
+        httpServer.listen(3000, () => {
             console.log(
                 'Postgres Server is running, GraphQL Playground available at http://localhost:3000/graphql'
             );
@@ -75,6 +82,7 @@ async function bootstrapMongo() {
         console.error(err);
     }
 }
+
 bootstrapPg().catch((err) => {
     console.log(err);
 });

@@ -42,7 +42,17 @@ export class UserResolver {
 
     @Query(() => User, { nullable: true })
     async getUser(@Arg('data') data: UserInput) {
-        return await this.repository.findOne({ ...data });
+        return await this.repository.findOne(
+            { ...data },
+            {
+                relations: [
+                    'receivedRatings',
+                    'givenRatings',
+                    'receivedRatings.fromUser',
+                    'givenRatings.toUser',
+                ],
+            }
+        );
     }
 
     @Query(() => String)

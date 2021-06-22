@@ -8,32 +8,41 @@ import {
 } from 'typeorm';
 import { Rating } from './Rating';
 
-@ObjectType()
 @Entity()
+@ObjectType()
 export class User extends BaseEntity {
     @Field(() => ID)
     @PrimaryGeneratedColumn()
     readonly id: number;
 
     @Field()
-    @Column('text', { unique: true })
+    @Column({ type: 'text', unique: true })
     email: string;
 
     @Field()
-    @Column('text', { unique: true })
+    @Column({ type: 'text', unique: true })
     username: string;
 
-    @Field()
-    @Column('varchar', { nullable: true })
+    @Field({ nullable: true })
+    @Column({ type: 'text', nullable: true })
+    gender: string;
+
+    @Field({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     description: string;
 
     @Column()
     password: string;
 
-    @Field()
-    @Column('text', { nullable: true })
+    @Field({ nullable: true })
+    @Column({ type: 'text', nullable: true })
     profileImage: string;
 
-    @OneToMany(() => Rating, (rating) => rating.user)
-    ratings: Rating[];
+    @Field(() => [Rating], { defaultValue: [] })
+    @OneToMany(() => Rating, (rating) => rating.toUser)
+    receivedRatings: Rating[];
+
+    @Field(() => [Rating], { defaultValue: [] })
+    @OneToMany(() => Rating, (rating) => rating.fromUser)
+    givenRatings: Rating[];
 }

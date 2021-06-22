@@ -4,12 +4,13 @@ import {
     Column,
     Entity,
     ManyToOne,
+    CreateDateColumn,
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './User';
 
-@ObjectType()
 @Entity()
+@ObjectType()
 export class Rating extends BaseEntity {
     @Field(() => ID)
     @PrimaryGeneratedColumn()
@@ -17,12 +18,24 @@ export class Rating extends BaseEntity {
 
     @Field()
     @Column()
-    rating: number;
+    rating: string;
+
+    @Field()
+    @CreateDateColumn({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP(6)',
+    })
+    createdAt: Date;
 
     @Field()
     @Column()
     comments: string;
 
-    @ManyToOne(() => User, (user) => user.ratings)
-    user: User;
+    @Field(() => User)
+    @ManyToOne(() => User, (user) => user.givenRatings)
+    fromUser: User;
+
+    @Field(() => User)
+    @ManyToOne(() => User, (user) => user.receivedRatings)
+    toUser: User;
 }

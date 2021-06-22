@@ -47,6 +47,23 @@ export class ProfileResolver {
         return this.repository.save(user);
     }
 
+    @Mutation(() => String)
+    @UseMiddleware(isAuth)
+    async updateDescription(
+        @Ctx() { payload }: MyContext,
+        @Arg('description') newDescription: string
+    ): Promise<string> {
+        const user = await this.repository.findOne(payload?.userId);
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        user.description = newDescription;
+        await this.repository.save(user);
+
+        return newDescription;
+    }
+
     @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
     async updatePassword(
