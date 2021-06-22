@@ -12,53 +12,61 @@ import { Service } from 'typedi';
 import { isAuth } from '@/middlewares/isAuth';
 import { MyContext } from '@/types/MyContext';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { Rating } from '@/entities/postgres/Rating';
+import { Message } from '@/entities/postgres/Message';
 import { User } from '@/entities/postgres/User';
-import { RatingInput } from './RatingInput';
+import { MessageInput } from './MessageInput';
+import { UserInput } from './../user/UserInput';
 
-@Resolver(() => Rating)
+@Resolver(() => Message)
 @Service()
-export class RatingResolver {
-    private repository: Repository<Rating>;
+export class MessageResolver {
+    private repository: Repository<Message>;
     private userRepository: Repository<User>;
 
     constructor(private readonly postgresService: PostgresService) {
-        this.repository = this.postgresService.getRepository(Rating);
+        this.repository = this.postgresService.getRepository(Message);
         this.userRepository = this.postgresService.getRepository(User);
     }
 
-    @Mutation(() => Rating)
+    @Mutation(() => Message)
     @UseMiddleware(isAuth)
-    async addRating(
+    async sendMessage(
         @Ctx() { payload }: MyContext,
-        @Arg('data') { comments, rating, toUser }: RatingInput
-    ): Promise<Rating> {
+        @Arg('data') { content, toUser }: MessageInput
+    ): Promise<Message> {
         const user = await this.userRepository.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
         }
-        const newRating = await this.repository.create({
-            rating,
-            comments,
+        const newMessage = await this.repository.create({
+            content,
             fromUser: user,
             toUser,
         });
 
-        await this.repository.save(newRating);
+        await this.repository.save(newMessage);
 
-        const eagerLoadedRating = await this.repository.findOne(newRating.id, {
+        const eagerLoadedRating = await this.repository.findOne(newMessage.id, {
             relations: ['fromUser', 'toUser'],
         });
+
         if (!eagerLoadedRating) {
-            throw new Error('Could not find rating');
+            throw new Error('Could not find message');
         }
 
         return eagerLoadedRating;
     }
 
-    @Query(() => [Rating])
-    async getRatings() {
+    @Query(() => [Message])
+    async getConversation(
+        @Ctx() { payload }: MyContext,
+        @Arg('toUser') toUser: UserInput
+    ) {
         return await this.repository.find({
+            where: {
+                fromUser: payload?.userId,
+                toUser,
+            },
             relations: ['fromUser', 'toUser'],
         });
     }

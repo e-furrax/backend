@@ -9,7 +9,6 @@ import {
     ObjectType,
     Field,
 } from 'type-graphql';
-import { RegisterInput } from './register/RegisterInput';
 import { Repository, In } from 'typeorm';
 import { Service } from 'typedi';
 import { sign } from 'jsonwebtoken';
@@ -27,6 +26,8 @@ import { sendEmail } from '@/utils/sendEmail';
 import { createConfirmationCode } from '@/utils/createConfirmationCode';
 import { redis } from '@/redis';
 import { FilterInput } from './FilterInput';
+import { RegisterInput } from './register/RegisterInput';
+import { Availability } from '@/entities/postgres/Availability';
 
 @ObjectType()
 class LoginResponse {
@@ -40,11 +41,14 @@ export class UserResolver {
     private repository: Repository<User>;
     private languageRepository: Repository<Language>;
     private gameRepository: Repository<Language>;
+    private availabilityRepository: Repository<Availability>;
+
 
     constructor(private readonly postgresService: PostgresService) {
         this.repository = this.postgresService.getRepository(User);
         this.languageRepository = this.postgresService.getRepository(Language);
         this.gameRepository = this.postgresService.getRepository(Game);
+        this.availabilityRepository = this.postgresService.getRepository(Availability);
     }
 
     @Query(() => [User])
@@ -106,13 +110,18 @@ export class UserResolver {
     ): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 12);
 
+        const availability = new Availability();
+        await this.availabilityRepository.save(availability);
+
         const user = await this.repository.create({
             username,
             email,
             password: hashedPassword,
             gender,
+            availability: availability,
         });
         user.status = Status.Verified;
+
         await this.repository.save(user);
 
         // await sendEmail(email, await createConfirmationCode(user.id));

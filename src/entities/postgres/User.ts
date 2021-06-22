@@ -4,6 +4,7 @@ import {
     Column,
     Entity,
     OneToMany,
+    OneToOne,
     PrimaryGeneratedColumn,
     JoinTable,
     ManyToMany,
@@ -11,6 +12,8 @@ import {
 import { Rating } from './Rating';
 import { Language } from './Language';
 import { Game } from './Game';
+import { Availability } from './Availability';
+import { Message } from './Message';
 
 export enum Status {
     Unverified,
@@ -74,4 +77,16 @@ export class User extends BaseEntity {
     @ManyToMany(() => Language)
     @JoinTable()
     languages: Language[];
+    
+    @Field(() => [Message], { defaultValue: [] })
+    @OneToMany(() => Rating, (message) => message.toUser)
+    receivedMessages: Message[];
+
+    @Field(() => [Message], { defaultValue: [] })
+    @OneToMany(() => Message, (message) => message.fromUser)
+    sentMessages: Message[];
+
+    @Field(() => Availability)
+    @OneToOne(() => Availability, (availability) => availability.user)
+    availability: Availability;
 }
