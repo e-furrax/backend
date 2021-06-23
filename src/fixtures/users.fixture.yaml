@@ -5,13 +5,16 @@ items:
         email: bob@gmail.com
         description: '{{lorem.paragraph}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'male'
     user1:
         username: xavier
         email: xavier@gmail.com
         description: '{{lorem.paragraph}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'male'
     user2:
         username: jean
         email: jean@gmail.com
         description: '{{lorem.paragraph}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'male'

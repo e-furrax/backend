@@ -30,9 +30,13 @@ export class User extends BaseEntity {
     @Column('text', { unique: true })
     email: string;
 
-    @Field({ nullable: true })
-    @Column('text', { unique: true, nullable: true })
+    @Field()
+    @Column('text', { unique: true })
     username: string;
+
+    @Field()
+    @Column('text')
+    gender: string;
 
     @Field({ nullable: true })
     @Column('varchar', { nullable: true })

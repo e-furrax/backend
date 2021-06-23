@@ -39,19 +39,21 @@ export class UserResolver {
 
     @Query(() => String)
     @UseMiddleware(isAuth)
-    async me(@Ctx() { payload }: MyContext) {
+    async me(@Ctx() { payload }: MyContext): Promise<string> {
         return `Your user id : ${payload?.userId}`;
     }
 
     @Mutation(() => User)
     async register(
-        @Arg('data') { email, password }: RegisterInput
+        @Arg('data') { email, password, username, gender }: RegisterInput
     ): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 12);
 
         const user = await User.create({
             email,
             password: hashedPassword,
+            username,
+            gender,
         }).save();
 
         await sendEmail(email, await createConfirmationCode(user.id));
@@ -84,18 +86,22 @@ export class UserResolver {
         };
     }
 
-    @Mutation(() => Boolean)
-    async confirmUser(@Arg('code') code: string): Promise<boolean> {
+    @Mutation(() => LoginResponse)
+    async confirmUser(@Arg('code') code: string): Promise<LoginResponse> {
         const userId = await redis.get(code);
 
         if (!userId) {
-            return false;
+            throw new Error("This code isn't valid");
         }
 
         await User.update({ id: +userId }, { status: Status.Verified });
         await redis.del(code);
 
-        return true;
+        return {
+            accessToken: sign({ userId }, 's3cr3tk3y', {
+                expiresIn: '15m',
+            }),
+        };
     }
 
     @Mutation(() => Boolean)
