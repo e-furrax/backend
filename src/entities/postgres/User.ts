@@ -5,6 +5,7 @@ import {
     Entity,
     OneToMany,
     OneToOne,
+    JoinColumn,
     PrimaryGeneratedColumn,
     JoinTable,
     ManyToMany,
@@ -86,7 +87,8 @@ export class User extends BaseEntity {
     @OneToMany(() => Message, (message) => message.fromUser)
     sentMessages: Message[];
 
-    @Field(() => Availability)
-    @OneToOne(() => Availability, (availability) => availability.user)
+    @Field()
+    @OneToOne(() => Availability)
+    @JoinColumn()
     availability: Availability;
 }

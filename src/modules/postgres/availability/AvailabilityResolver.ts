@@ -13,15 +13,18 @@ import { isAuth } from '@/middlewares/isAuth';
 import { MyContext } from '@/types/MyContext';
 import { PostgresService } from '@/services/repositories/postgres-service';
 import { Availability } from '@/entities/postgres/Availability';
+import { User } from '@/entities/postgres/User';
 import { UserInput } from './../user/UserInput';
 
 @Resolver(() => Availability)
 @Service()
 export class AvailabilityResolver {
     private repository: Repository<Availability>;
+    private userRepository: Repository<User>;
 
     constructor(private readonly postgresService: PostgresService) {
         this.repository = this.postgresService.getRepository(Availability);
+        this.userRepository = this.postgresService.getRepository(User);
     }
 
     @Mutation(() => Availability)
@@ -47,10 +50,17 @@ export class AvailabilityResolver {
 
     @Query(() => Availability)
     async getAvailability(@Arg('user') user: UserInput) {
-        return await this.repository.findOne({
+        const userFound = await this.userRepository.findOne({
             where: {
-                user,
+                id: user.id,
             },
+            relations: ['availability'],
         });
+
+        if (!userFound) {
+            throw new Error('User not found');
+        }
+
+        return userFound.availability;
     }
 }
