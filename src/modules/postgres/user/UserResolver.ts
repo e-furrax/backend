@@ -9,6 +9,7 @@ import {
     ObjectType,
     Field,
 } from 'type-graphql';
+import { RegisterInput } from './register/RegisterInput';
 import { Repository } from 'typeorm';
 import { Service } from 'typedi';
 import { sign } from 'jsonwebtoken';
@@ -16,9 +17,11 @@ import { sign } from 'jsonwebtoken';
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { User } from '@/entities/postgres/User';
+import { User, Status } from '@/entities/postgres/User';
 import { UserInput } from './UserInput';
-import { RegisterInput } from './register/RegisterInput';
+import { sendEmail } from '@/utils/sendEmail';
+import { createConfirmationCode } from '@/utils/createConfirmationCode';
+import { redis } from '@/redis';
 
 @ObjectType()
 class LoginResponse {
@@ -57,13 +60,13 @@ export class UserResolver {
 
     @Query(() => String)
     @UseMiddleware(isAuth)
-    async me(@Ctx() { payload }: MyContext) {
+    async me(@Ctx() { payload }: MyContext): Promise<string> {
         return `Your user id : ${payload?.userId}`;
     }
 
     @Mutation(() => User)
     async register(
-        @Arg('data') { email, password, username }: RegisterInput
+        @Arg('data') { email, password, username, gender }: RegisterInput
     ): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -71,9 +74,11 @@ export class UserResolver {
             username,
             email,
             password: hashedPassword,
+            gender,
         });
         await this.repository.save(user);
 
+        await sendEmail(email, await createConfirmationCode(user.id));
         return user;
     }
 
@@ -89,9 +94,12 @@ export class UserResolver {
         }
 
         const verify = await bcrypt.compare(password, user.password);
-
         if (!verify) {
             throw new Error('Wrong password');
+        }
+
+        if (user.status < Status.Verified) {
+            throw new Error('Registration incomplete');
         }
 
         return {
@@ -99,5 +107,43 @@ export class UserResolver {
                 expiresIn: '15m',
             }),
         };
+    }
+
+    @Mutation(() => LoginResponse)
+    async confirmUser(@Arg('code') code: string): Promise<LoginResponse> {
+        const userId = await redis.get(code);
+
+        if (!userId) {
+            throw new Error("This code isn't valid");
+        }
+
+        await User.update({ id: +userId }, { status: Status.Verified });
+        await redis.del(code);
+
+        return {
+            accessToken: sign({ userId }, 's3cr3tk3y', {
+                expiresIn: '15m',
+            }),
+        };
+    }
+
+    @Mutation(() => Boolean)
+    async generateVerificationCode(
+        @Arg('email') email: string,
+        @Arg('password') password: string
+    ): Promise<boolean> {
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        const verify = await bcrypt.compare(password, user.password);
+        if (!verify) {
+            return false;
+        }
+
+        await sendEmail(email, await createConfirmationCode(user.id));
+
+        return true;
     }
 }

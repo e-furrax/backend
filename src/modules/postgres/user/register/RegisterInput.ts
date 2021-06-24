@@ -17,4 +17,7 @@ export class RegisterInput {
 
     @Field()
     password: string;
+
+    @Field()
+    gender: string;
 }

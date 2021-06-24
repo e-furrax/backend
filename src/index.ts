@@ -4,6 +4,10 @@ import { ApolloServer } from 'apollo-server-express';
 import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
+import session from 'express-session';
+import { redis } from './redis';
+import connectRedis from 'connect-redis';
+// import cors from 'cors';
 import { Container } from 'typedi';
 import http from 'http';
 
@@ -39,6 +43,32 @@ async function bootstrapPg() {
         postgresApp.use(
             '/graphql',
             graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 })
+        );
+
+        // postgresApp.use(
+        //     cors({
+        //         credentials: true,
+        //         origin: 'http://localhost:3000',
+        //     })
+        // );
+
+        const RedisStore = connectRedis(session);
+
+        postgresApp.use(
+            session({
+                store: new RedisStore({
+                    client: redis,
+                }),
+                name: 'qid',
+                secret: 'aslkdfjoiq12312',
+                resave: false,
+                saveUninitialized: false,
+                cookie: {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    maxAge: 1000 * 60 * 60 * 24 * 7 * 365, // 7 years
+                },
+            })
         );
 
         server.applyMiddleware({ app: postgresApp, path: GQLpath });
