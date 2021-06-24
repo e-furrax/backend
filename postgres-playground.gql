@@ -1,0 +1,11 @@
+mutation Register($data: RegisterInput!) {
+  register(data: $data){
+    id
+    email
+  }
+}
+mutation Login {
+  login(password: "1", email: "ada@g.com") {
+    accessToken
+  }
+}

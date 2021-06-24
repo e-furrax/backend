@@ -1,32 +1,38 @@
-name: Common Jobs CI
+name: Common Jobs
 
 on: push
 
 jobs:
-    common:
-        name: 'Common jobs'
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
+  common:
+    name: 'Common jobs'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Install modules
+        run: yarn
 
-            - uses: actions/cache@v2
-              id: yarn-cache
-              with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
+      - name: Build
+        run: yarn run build
 
-            - name: Install modules
-              if: steps.yarn-cache.outputs.cache-hit != 'true'
-              run: yarn
+      - name: Create artifact directory
+        run: mkdir -p artifact/src
 
-            - name: Run ESLint
-              run: yarn run lint
+      - name: Copy dist to artifact
+        run: cp -r dist artifact
 
-            - name: Run Tests
-              run: yarn test
+      - name: Copy ormconfig
+        run: cp ormconfig.js artifact
+
+      - name: Copy package
+        run: cp package.json artifact && cp package-lock.json artifact
+
+      - name: Copy fixtures
+        run: cp -r src/fixtures artifact/src
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifact
+          path: artifact
+          retention-days: 30

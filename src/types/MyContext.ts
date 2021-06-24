@@ -7,5 +7,5 @@ export interface MyContext {
 }
 
 export interface MyContextPayload {
-    userId: string;
+    userId: number;
 }

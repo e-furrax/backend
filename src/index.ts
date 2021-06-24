@@ -1,65 +1,43 @@
+import 'module-alias/register';
 import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
-import { connect } from 'mongoose';
 import * as TypeORM from 'typeorm';
 import * as TypeGraphQL from 'type-graphql';
 import express from 'express';
-import * as path from 'path';
 import session from 'express-session';
 import { redis } from './redis';
 import connectRedis from 'connect-redis';
 // import cors from 'cors';
+import { Container } from 'typedi';
+import http from 'http';
 
-import { User } from './entities/User';
-import { Game } from './entities/Game';
-import { Rating } from './entities/Rating';
-import { CalendarResolver } from './modules/calendar/CalendarResolver';
-import {
-    Builder,
-    fixturesIterator,
-    Loader,
-    Parser,
-    Resolver,
-} from 'typeorm-fixtures-cli/dist';
-import { createSchema } from './utils/createSchema';
 import { graphqlUploadExpress } from 'graphql-upload';
+import { loadFixtures } from '@/utils/loadFixtures';
+import { MongoResolvers, PostgresResolvers } from '@/modules';
 
 const postgresApp = express();
 const mongoApp = express();
 
 const GQLpath = '/graphql';
 
-async function bootstrap() {
+async function bootstrapPg() {
     try {
-        const connection = await TypeORM.createConnection({
-            type: 'postgres',
-            url: 'postgres://furrax:furrax@postgres_container/furrax',
-            entities: [User, Game, Rating],
-            synchronize: true,
-            logger: 'advanced-console',
-            logging: true,
-            dropSchema: true,
-            cache: true,
+        const connection = await TypeORM.createConnection('postgres');
+        Container.set('POSTGRES_MANAGER', connection);
+
+        const schema = await TypeGraphQL.buildSchema({
+            resolvers: PostgresResolvers,
+            container: Container,
         });
 
-        const loader = new Loader();
-        loader.load(path.resolve('./src/fixtures'));
-
-        const resolver = new Resolver();
-        const fixtures = resolver.resolve(loader.fixtureConfigs);
-        const builder = new Builder(connection, new Parser());
-
-        for (const fixture of fixturesIterator(fixtures)) {
-            const entity = await builder.build(fixture);
-            await TypeORM.getRepository(entity.constructor.name).save(entity);
-        }
-
-        const schema = await createSchema();
-
+        await loadFixtures(connection);
         const server = new ApolloServer({
             schema,
             context: ({ req, res }) => ({ req, res }),
             uploads: false,
+            subscriptions: {
+                onConnect: () => console.log('Connected to websocket'),
+            },
         });
 
         postgresApp.use(
@@ -95,9 +73,12 @@ async function bootstrap() {
 
         server.applyMiddleware({ app: postgresApp, path: GQLpath });
 
-        postgresApp.listen(3000, () => {
+        const httpServer = http.createServer(postgresApp);
+        server.installSubscriptionHandlers(httpServer);
+
+        httpServer.listen(3000, () => {
             console.log(
-                'Server is running, GraphQL Playground available at http://localhost:3000/graphql'
+                'Postgres Server is running, GraphQL Playground available at http://localhost:3000/graphql'
             );
         });
     } catch (err) {
@@ -105,13 +86,14 @@ async function bootstrap() {
     }
 }
 
-async function bootstrap2() {
+async function bootstrapMongo() {
     try {
-        await connect('mongodb://furrax:furrax@mongo_container/furrax');
-        // await mongoose.connection.db.dropDatabase();
+        const connection = await TypeORM.createConnection('mongodb');
+        Container.set('MONGO_MANAGER', connection);
 
         const schema = await TypeGraphQL.buildSchema({
-            resolvers: [CalendarResolver],
+            resolvers: MongoResolvers,
+            container: Container,
         });
 
         const server = new ApolloServer({
@@ -123,7 +105,7 @@ async function bootstrap2() {
 
         mongoApp.listen(4000, () => {
             console.log(
-                'Server is running, GraphQL Playground available at http://localhost:4000/graphql'
+                'Mongo Server is running, GraphQL Playground available at http://localhost:4000/graphql'
             );
         });
     } catch (err) {
@@ -131,11 +113,10 @@ async function bootstrap2() {
     }
 }
 
-bootstrap()
-    .then(() => {
-        console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.');
-    })
-    .catch((err) => {
-        console.log(err);
-    });
-bootstrap2();
+bootstrapPg().catch((err) => {
+    console.log(err);
+});
+
+bootstrapMongo().catch((err) => {
+    console.log(err);
+});
