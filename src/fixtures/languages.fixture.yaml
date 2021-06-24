@@ -1,0 +1,10 @@
+entity: Language
+items:
+    language0:
+        name: French
+    language1:
+        name: English
+    language2:
+        name: Japanese
+    language3:
+        name: Korean
