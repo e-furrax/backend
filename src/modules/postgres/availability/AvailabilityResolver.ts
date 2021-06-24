@@ -33,19 +33,20 @@ export class AvailabilityResolver {
         @Ctx() { payload }: MyContext,
         @Arg('value') value: string
     ): Promise<Availability> {
-        const availability = await this.repository.findOne({
+        const user = await this.userRepository.findOne({
             where: {
-                user: payload?.userId,
+                id: payload?.userId,
             },
+            relations: ['availability'],
         });
-        if (!availability) {
-            throw new Error('Could not find availability');
+        if (!user) {
+            throw new Error('Could not found user');
         }
 
-        availability.value = value;
-        await this.repository.save(availability);
+        user.availability.value = value;
+        await this.repository.save(user.availability);
 
-        return availability;
+        return user.availability;
     }
 
     @Query(() => Availability)
