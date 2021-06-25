@@ -16,6 +16,7 @@ import { Message } from '@/entities/postgres/Message';
 import { User } from '@/entities/postgres/User';
 import { MessageInput } from './MessageInput';
 import { UserInput } from './../user/UserInput';
+import { ConversationsObject } from './ConversationsObject';
 
 @Resolver(() => Message)
 @Service()
@@ -28,12 +29,12 @@ export class MessageResolver {
         this.userRepository = this.postgresService.getRepository(User);
     }
 
-    @Mutation(() => Message)
+    @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
     async sendMessage(
         @Ctx() { payload }: MyContext,
         @Arg('data') { content, toUser }: MessageInput
-    ): Promise<Message> {
+    ): Promise<boolean> {
         const user = await this.userRepository.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
@@ -46,18 +47,11 @@ export class MessageResolver {
 
         await this.repository.save(newMessage);
 
-        const eagerLoadedRating = await this.repository.findOne(newMessage.id, {
-            relations: ['fromUser', 'toUser'],
-        });
-
-        if (!eagerLoadedRating) {
-            throw new Error('Could not find message');
-        }
-
-        return eagerLoadedRating;
+        return true;
     }
 
     @Query(() => [Message])
+    @UseMiddleware(isAuth)
     async getConversation(
         @Ctx() { payload }: MyContext,
         @Arg('toUser') toUser: UserInput
@@ -69,5 +63,27 @@ export class MessageResolver {
             },
             relations: ['fromUser', 'toUser'],
         });
+    }
+
+    @Query(() => [ConversationsObject])
+    @UseMiddleware(isAuth)
+    async getConversations(
+        @Ctx() { payload }: MyContext
+    ): Promise<ConversationsObject[]> {
+        // return await this.repository.find({
+        //     where: {
+        //         fromUser: payload?.userId,
+        //     },
+        //     relations: ['fromUser', 'toUser'],
+        // });
+
+        return await this.repository
+            .createQueryBuilder('message')
+            .select(['toUser.id', 'toUser.username'])
+            .distinct(true)
+            .leftJoinAndSelect('message.toUser', 'toUser')
+            .leftJoinAndSelect('message.fromUser', 'fromUser')
+            .where('fromUser.id = :userId', { userId: payload?.userId })
+            .getRawMany();
     }
 }

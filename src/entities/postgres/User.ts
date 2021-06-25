@@ -78,7 +78,7 @@ export class User extends BaseEntity {
     @ManyToMany(() => Language)
     @JoinTable()
     languages: Language[];
-    
+
     @Field(() => [Message], { defaultValue: [] })
     @OneToMany(() => Rating, (message) => message.toUser)
     receivedMessages: Message[];

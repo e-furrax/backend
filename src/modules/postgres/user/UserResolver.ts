@@ -43,12 +43,12 @@ export class UserResolver {
     private gameRepository: Repository<Language>;
     private availabilityRepository: Repository<Availability>;
 
-
     constructor(private readonly postgresService: PostgresService) {
         this.repository = this.postgresService.getRepository(User);
         this.languageRepository = this.postgresService.getRepository(Language);
         this.gameRepository = this.postgresService.getRepository(Game);
-        this.availabilityRepository = this.postgresService.getRepository(Availability);
+        this.availabilityRepository =
+            this.postgresService.getRepository(Availability);
     }
 
     @Query(() => [User])
