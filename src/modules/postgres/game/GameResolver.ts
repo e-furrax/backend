@@ -31,10 +31,10 @@ export class GameResolver {
     }
 
     @Mutation(() => Boolean)
-    async deleteGame(@Arg('id') id: string): Promise<boolean> {
-        const game = await this.repository.findOne({ where: { id } });
+    async deleteGame(@Arg('id') id: number): Promise<boolean> {
+        const game = await this.repository.findOne(id);
         if (!game) {
-            throw new Error(`The game with id : ${id} does not exist`);
+            throw new Error(`Game "${id}" not found.`);
         }
         await this.repository.remove(game);
 
@@ -43,12 +43,12 @@ export class GameResolver {
 
     @Mutation(() => Game)
     async updateGame(
-        @Arg('id') id: string,
+        @Arg('id') id: number,
         @Arg('data') data: InsertGameInput
     ) {
-        const game = await this.repository.findOne({ where: { id } });
+        const game = await this.repository.findOne(id);
         if (!game) {
-            throw new Error(`The game with id: ${id} does not exist`);
+            throw new Error(`Game "${id}" not found.`);
         }
         Object.assign(game, data);
         await this.repository.save(game);

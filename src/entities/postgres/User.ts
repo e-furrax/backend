@@ -5,8 +5,12 @@ import {
     Entity,
     OneToMany,
     PrimaryGeneratedColumn,
+    JoinTable,
+    ManyToMany,
 } from 'typeorm';
 import { Rating } from './Rating';
+import { Language } from './Language';
+import { Game } from './Game';
 
 export enum Status {
     Unverified,
@@ -60,4 +64,14 @@ export class User extends BaseEntity {
     @Field(() => [Rating], { defaultValue: [] })
     @OneToMany(() => Rating, (rating) => rating.fromUser)
     givenRatings: Rating[];
+
+    @Field(() => [Game], { defaultValue: [] })
+    @ManyToMany(() => Game)
+    @JoinTable()
+    games: Game[];
+
+    @Field(() => [Language], { defaultValue: [] })
+    @ManyToMany(() => Language)
+    @JoinTable()
+    languages: Language[];
 }

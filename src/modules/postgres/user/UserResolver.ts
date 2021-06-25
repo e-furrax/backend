@@ -10,7 +10,7 @@ import {
     Field,
 } from 'type-graphql';
 import { RegisterInput } from './register/RegisterInput';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Service } from 'typedi';
 import { sign } from 'jsonwebtoken';
 
@@ -18,10 +18,15 @@ import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
 import { PostgresService } from '@/services/repositories/postgres-service';
 import { User, Status } from '@/entities/postgres/User';
+import { Language } from '@/entities/postgres/Language';
+import { Game } from '@/entities/postgres/Game';
+import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
+import { GamesInput } from '@/modules/postgres/game/GamesInput';
 import { UserInput } from './UserInput';
 import { sendEmail } from '@/utils/sendEmail';
 import { createConfirmationCode } from '@/utils/createConfirmationCode';
 import { redis } from '@/redis';
+import { FilterInput } from './FilterInput';
 
 @ObjectType()
 class LoginResponse {
@@ -33,14 +38,43 @@ class LoginResponse {
 @Service()
 export class UserResolver {
     private repository: Repository<User>;
+    private languageRepository: Repository<Language>;
+    private gameRepository: Repository<Language>;
 
     constructor(private readonly postgresService: PostgresService) {
         this.repository = this.postgresService.getRepository(User);
+        this.languageRepository = this.postgresService.getRepository(Language);
+        this.gameRepository = this.postgresService.getRepository(Game);
     }
 
     @Query(() => [User])
-    async getUsers() {
-        return await this.repository.find();
+    async getUsers(@Arg('data', { nullable: true }) data?: FilterInput) {
+        const usersQuery = await this.repository
+            .createQueryBuilder('user')
+            .leftJoinAndSelect('user.languages', 'languages')
+            .leftJoinAndSelect('user.receivedRatings', 'receivedRatings')
+            .leftJoinAndSelect('user.games', 'games')
+            .where('user.status = :status', { status: Status.Verified });
+
+        if (data && data.languages) {
+            usersQuery.andWhere('languages.id IN(:...languagesIds)', {
+                languagesIds: data.languages,
+            });
+        }
+
+        if (data && data.games) {
+            usersQuery.andWhere('games.id IN(:...gamesIds)', {
+                gamesIds: data.games,
+            });
+        }
+
+        if (data && data.gender) {
+            usersQuery.andWhere('user.gender = :gender ', {
+                gender: data.gender,
+            });
+        }
+
+        return await usersQuery.getMany();
     }
 
     @Query(() => User, { nullable: true })
@@ -53,6 +87,8 @@ export class UserResolver {
                     'givenRatings',
                     'receivedRatings.fromUser',
                     'givenRatings.toUser',
+                    'languages',
+                    'games',
                 ],
             }
         );
@@ -76,9 +112,10 @@ export class UserResolver {
             password: hashedPassword,
             gender,
         });
+        user.status = Status.Verified;
         await this.repository.save(user);
 
-        await sendEmail(email, await createConfirmationCode(user.id));
+        // await sendEmail(email, await createConfirmationCode(user.id));
         return user;
     }
 
@@ -117,7 +154,14 @@ export class UserResolver {
             throw new Error("This code isn't valid");
         }
 
-        await User.update({ id: +userId }, { status: Status.Verified });
+        const user = await this.repository.findOne(+userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        user.status = Status.Verified;
+        await this.repository.save(user);
+
+        // await User.update({ id: +userId }, { status: Status.Verified });
         await redis.del(code);
 
         return {
@@ -145,5 +189,72 @@ export class UserResolver {
         await sendEmail(email, await createConfirmationCode(user.id));
 
         return true;
+    }
+
+    @Mutation(() => User)
+    @UseMiddleware(isAuth)
+    async addLanguages(
+        @Ctx() { payload }: MyContext,
+        @Arg('languages') languages: LanguagesInput
+    ): Promise<User> {
+        const user = await this.repository.findOne({
+            where: {
+                id: payload?.userId,
+            },
+            relations: ['languages'],
+        });
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        const languagesFound = await this.languageRepository.find({
+            where: {
+                id: In(languages.ids),
+            },
+        });
+
+        if (!languagesFound.length) {
+            throw new Error('Could not find languages');
+        }
+
+        user.languages = [...user.languages, ...languagesFound];
+
+        await this.repository.save(user);
+
+        return user;
+    }
+
+    @Mutation(() => User)
+    @UseMiddleware(isAuth)
+    async addGames(
+        @Ctx() { payload }: MyContext,
+        @Arg('games') games: GamesInput
+    ): Promise<User> {
+        const user = await this.repository.findOne({
+            where: {
+                id: payload?.userId,
+            },
+            relations: ['games'],
+        });
+
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        const gamesFound = await this.gameRepository.find({
+            where: {
+                id: In(games.ids),
+            },
+        });
+
+        if (!gamesFound.length) {
+            throw new Error('Could not find games');
+        }
+
+        user.games = [...user.games, ...gamesFound];
+
+        await this.repository.save(user);
+
+        return user;
     }
 }
