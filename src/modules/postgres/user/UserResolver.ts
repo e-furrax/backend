@@ -217,7 +217,7 @@ export class UserResolver {
             throw new Error('Could not find languages');
         }
 
-        user.languages = languagesFound;
+        user.languages = [...user.languages, ...languagesFound];
 
         await this.repository.save(user);
 
@@ -251,7 +251,7 @@ export class UserResolver {
             throw new Error('Could not find games');
         }
 
-        user.games = gamesFound;
+        user.games = [...user.games, ...gamesFound];
 
         await this.repository.save(user);
 
