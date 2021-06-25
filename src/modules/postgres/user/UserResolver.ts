@@ -26,6 +26,7 @@ import { UserInput } from './UserInput';
 import { sendEmail } from '@/utils/sendEmail';
 import { createConfirmationCode } from '@/utils/createConfirmationCode';
 import { redis } from '@/redis';
+import { FilterInput } from './FilterInput';
 
 @ObjectType()
 class LoginResponse {
@@ -47,8 +48,33 @@ export class UserResolver {
     }
 
     @Query(() => [User])
-    async getUsers() {
-        return await this.repository.find();
+    async getUsers(@Arg('data', { nullable: true }) data?: FilterInput) {
+        const usersQuery = await this.repository
+            .createQueryBuilder('user')
+            .leftJoinAndSelect('user.languages', 'languages')
+            .leftJoinAndSelect('user.receivedRatings', 'receivedRatings')
+            .leftJoinAndSelect('user.games', 'games')
+            .where('user.status = :status', { status: Status.Verified });
+
+        if (data && data.languages) {
+            usersQuery.andWhere('languages.id IN(:...languagesIds)', {
+                languagesIds: data.languages,
+            });
+        }
+
+        if (data && data.games) {
+            usersQuery.andWhere('games.id IN(:...gamesIds)', {
+                gamesIds: data.games,
+            });
+        }
+
+        if (data && data.gender) {
+            usersQuery.andWhere('user.gender = :gender ', {
+                gender: data.gender,
+            });
+        }
+
+        return await usersQuery.getMany();
     }
 
     @Query(() => User, { nullable: true })
