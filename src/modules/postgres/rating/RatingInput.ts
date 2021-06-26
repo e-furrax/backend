@@ -1,7 +1,7 @@
 import { Field, InputType } from 'type-graphql';
 import { Rating } from '@/entities/postgres/Rating';
 import { User } from '@/entities/postgres/User';
-import { ToUserInput } from './ToUserInput';
+import { UserInput } from './../user/UserInput';
 
 @InputType()
 export class RatingInput implements Partial<Rating> {
@@ -11,6 +11,6 @@ export class RatingInput implements Partial<Rating> {
     @Field()
     rating: string;
 
-    @Field(() => ToUserInput)
+    @Field(() => UserInput)
     toUser: User;
 }

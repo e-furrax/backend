@@ -5,10 +5,6 @@ import {
     UseMiddleware,
     Ctx,
     Query,
-    Subscription,
-    Root,
-    PubSub,
-    PubSubEngine,
 } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { Service } from 'typedi';
@@ -19,7 +15,6 @@ import { PostgresService } from '@/services/repositories/postgres-service';
 import { Rating } from '@/entities/postgres/Rating';
 import { User } from '@/entities/postgres/User';
 import { RatingInput } from './RatingInput';
-import { RatingNotification } from './RatingNotification';
 
 @Resolver(() => Rating)
 @Service()
@@ -36,8 +31,7 @@ export class RatingResolver {
     @UseMiddleware(isAuth)
     async addRating(
         @Ctx() { payload }: MyContext,
-        @Arg('data') { comments, rating, toUser }: RatingInput,
-        @PubSub() pubSub: PubSubEngine
+        @Arg('data') { comments, rating, toUser }: RatingInput
     ): Promise<Rating> {
         const user = await this.userRepository.findOne(payload?.userId);
         if (!user) {
@@ -59,8 +53,6 @@ export class RatingResolver {
             throw new Error('Could not find rating');
         }
 
-        await pubSub.publish('NEW_RATING', eagerLoadedRating);
-
         return eagerLoadedRating;
     }
 
@@ -69,12 +61,5 @@ export class RatingResolver {
         return await this.repository.find({
             relations: ['fromUser', 'toUser'],
         });
-    }
-
-    @Subscription(() => Rating, { topics: 'NEW_RATING' })
-    newRating(
-        @Root() notificationPayload: RatingNotification
-    ): RatingNotification {
-        return { ...notificationPayload };
     }
 }
