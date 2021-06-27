@@ -97,6 +97,7 @@ export class MessageResolver {
             .leftJoinAndSelect('message.toUser', 'toUser')
             .leftJoinAndSelect('message.fromUser', 'fromUser')
             .where('fromUser.id = :userId', { userId: payload?.userId })
+            .orWhere('toUser.id = :userId2', { userId2: payload?.userId })
             .getRawMany();
     }
 

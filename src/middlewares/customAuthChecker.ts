@@ -3,7 +3,7 @@ import { MyContextPayload } from '@/types/MyContext';
 import { verify } from 'jsonwebtoken';
 
 export const customAuthChecker: AuthChecker<any> = ({ context }) => {
-    const authorization = context.extended['Authorization'];
+    const authorization = context.extended['authorization'];
     if (!authorization) {
         return false;
     }
