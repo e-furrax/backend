@@ -5,6 +5,11 @@ import {
     UseMiddleware,
     Ctx,
     Query,
+    Subscription,
+    Root,
+    PubSub,
+    PubSubEngine,
+    Authorized,
 } from 'type-graphql';
 import { Repository } from 'typeorm';
 import { Service } from 'typedi';
@@ -33,19 +38,34 @@ export class MessageResolver {
     @UseMiddleware(isAuth)
     async sendMessage(
         @Ctx() { payload }: MyContext,
-        @Arg('data') { content, toUser }: MessageInput
+        @Arg('data') { content, toUser }: MessageInput,
+        @PubSub() pubSub: PubSubEngine
     ): Promise<boolean> {
-        const user = await this.userRepository.findOne(payload?.userId);
-        if (!user) {
-            throw new Error('Could not find user');
+        const fromUser = await this.userRepository.findOne(payload?.userId);
+        if (!fromUser) {
+            throw new Error('Could not find fromUser');
         }
+
+        const toUserFound = await this.userRepository.findOne(toUser.id);
+        if (!toUserFound) {
+            throw new Error('Could not find toUser');
+        }
+
         const newMessage = await this.repository.create({
             content,
-            fromUser: user,
-            toUser,
+            fromUser: {
+                id: fromUser.id,
+                username: fromUser.username,
+            },
+            toUser: {
+                id: toUserFound.id,
+                username: toUserFound.username,
+            },
         });
 
         await this.repository.save(newMessage);
+
+        await pubSub.publish('NEW_MESSAGE', newMessage);
 
         return true;
     }
@@ -70,13 +90,6 @@ export class MessageResolver {
     async getConversations(
         @Ctx() { payload }: MyContext
     ): Promise<ConversationsObject[]> {
-        // return await this.repository.find({
-        //     where: {
-        //         fromUser: payload?.userId,
-        //     },
-        //     relations: ['fromUser', 'toUser'],
-        // });
-
         return await this.repository
             .createQueryBuilder('message')
             .select(['toUser.id', 'toUser.username'])
@@ -85,5 +98,23 @@ export class MessageResolver {
             .leftJoinAndSelect('message.fromUser', 'fromUser')
             .where('fromUser.id = :userId', { userId: payload?.userId })
             .getRawMany();
+    }
+
+    @Subscription({
+        topics: 'NEW_MESSAGE',
+        filter: ({
+            payload: messagePayload,
+            context,
+        }: {
+            payload: Message;
+            context: MyContext;
+        }) => {
+            console.log(messagePayload.toUser.id, context.payload?.userId);
+            return messagePayload.toUser.id === context.payload?.userId;
+        },
+    })
+    @Authorized()
+    newMessage(@Root() messagePayload: Message): Message {
+        return messagePayload;
     }
 }

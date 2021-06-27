@@ -14,6 +14,7 @@ import http from 'http';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { loadFixtures } from '@/utils/loadFixtures';
 import { MongoResolvers, PostgresResolvers } from '@/modules';
+import { customAuthChecker } from './middlewares/customAuthChecker';
 
 const postgresApp = express();
 const mongoApp = express();
@@ -28,15 +29,25 @@ async function bootstrapPg() {
         const schema = await TypeGraphQL.buildSchema({
             resolvers: PostgresResolvers,
             container: Container,
+            authChecker: customAuthChecker,
         });
 
         await loadFixtures(connection);
         const server = new ApolloServer({
             schema,
-            context: ({ req, res }) => ({ req, res }),
+            context: ({ req, res, connection }) => {
+                if ((!req || !req.headers) && connection) {
+                    return connection.context;
+                }
+
+                return { req, res, connection };
+            },
             uploads: false,
             subscriptions: {
-                onConnect: () => console.log('Connected to websocket'),
+                onConnect: (connectionParams) => {
+                    return { extended: connectionParams };
+                },
+                path: '/subscriptions',
             },
         });
 
@@ -78,7 +89,7 @@ async function bootstrapPg() {
 
         httpServer.listen(3000, () => {
             console.log(
-                'Postgres Server is running, GraphQL Playground available at http://localhost:3000/graphql'
+                '🚀 Postgres Server is running, GraphQL Playground available at http://localhost:3000/graphql'
             );
         });
     } catch (err) {
