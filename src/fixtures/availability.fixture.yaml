@@ -1,0 +1,3 @@
+entity: Availability
+items:
+    availability{0..10}:

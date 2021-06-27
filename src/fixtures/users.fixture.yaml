@@ -1,42 +1,69 @@
 entity: User
 items:
     user0:
-        username: bob
+        username: Pierre
         email: bob@gmail.com
         description: '{{lorem.paragraph}}'
+        createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
-        gender: 'male'
-        status: 2
-        role: 'user'
+        gender: 'Male'
+        availability: '@availability0'
+        status: 1
+        role: 'USER'
     user1:
-        username: xavier
+        username: Basile
         email: xavier@gmail.com
         description: '{{lorem.paragraph}}'
+        createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
-        gender: 'male'
-        status: 2
-        role: 'user'
+        gender: 'Male'
+        availability: '@availability1'
+        status: 1
+        role: 'USER'
     user2:
-        username: paul
-        email: paul@gmail.com
+        username: Thomas
+        email: thomas@gmail.com
         description: '{{lorem.paragraph}}'
+        createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
-        gender: 'male'
-        status: 2
-        role: 'furrax'
+        gender: 'Male'
+        availability: '@availability2'
+        status: 1
+        role: 'USER'
     user3:
-        username: jacques
-        email: jacques@gmail.com
+        username: Tom
+        email: tom@gmail.com
         description: '{{lorem.paragraph}}'
-        password: '$2y$12$nXnajHcdoPYUrKqHzF6SYesfeIuGeAf6MSmY70MkPeZoJQZQYIotq'
-        gender: 'male'
-        status: 2
-        role: 'admin'
-    user4:
-        username: louis
-        email: louis@gmail.com
+        createdAt: '{{date.recent}}'
+        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'Male'
+        status: 1
+        role: 'USER'
+        availability: '@availability3'
+        languages:
+            - '@language0'
+            - '@language1'
+            - '@language2'
+        games:
+            - '@game0'
+            - '@game3'
+    user{4..6}:
+        username: '{{internet.userName}}'
+        email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
-        password: '$2y$12$nXnajHcdoPYUrKqHzF6SYesfeIuGeAf6MSmY70MkPeZoJQZQYIotq'
-        gender: 'male'
-        status: 2
-        role: 'moderator'
+        createdAt: '{{date.recent}}'
+        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'Female'
+        availability: '@availability($current)'
+        status: 1
+        role: 'USER'
+    user{7..10}:
+        username: '{{internet.userName}}'
+        email: '{{internet.exampleEmail}}'
+        description: '{{lorem.paragraph}}'
+        createdAt: '{{date.recent}}'
+        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'Male'
+        status: 1
+        role: 'USER'
+        availability: '@availability($current)'
