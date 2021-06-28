@@ -97,10 +97,10 @@ export class AppointmentResolver {
         return updatedAppointment;
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => [Appointment])
     deleteAppointment(
-        @Arg('ids') { ids }: AppointmentIdsInput
-    ): Promise<boolean> {
+        @Arg('payload') { ids }: AppointmentIdsInput
+    ): Promise<Appointment[]> {
         return Promise.all(
             ids.map(async (id: string) => {
                 const _id = ObjectId.createFromHexString(id);
@@ -122,13 +122,15 @@ export class AppointmentResolver {
                             'transactions.$.status':
                                 TransactionStatus.CANCELLED,
                         },
-                    }
+                    },
+                    { returnOriginal: false }
                 );
             })
-        ).then((result) => {
-            // Make the return more explicit
-            return !result.filter((res) => !res.lastErrorObject.updatedExisting)
-                .length; // At least one mutation failed
+        ).then((updatedAppointments) => {
+            const res = updatedAppointments
+                .filter((appointment) => appointment.value !== null)
+                .map((res) => res.value);
+            return res;
         });
     }
 }
