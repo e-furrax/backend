@@ -97,22 +97,24 @@ export class AppointmentResolver {
         return updatedAppointment;
     }
 
-    @Mutation(() => Appointment)
-    @UseMiddleware(isAuth)
+    @Mutation(() => Boolean)
     deleteAppointment(
-        @Arg('appointments') { ids }: AppointmentIdsInput
-    ): Promise<Appointment>[] {
-        return ids.map(async (id: string): Promise<Appointment> => {
-            const _id = ObjectId.createFromHexString(id);
-            const appointment = await this.appointmentRepository.findOne({
-                _id,
-            });
-            if (!appointment) {
-                return Promise.reject(new Error(`No Appointment ID ${_id}.`));
-            }
-            // TODO: UPDATE MULTIPLE TRANSACTION STATUS AT ONCE
-            const { value: updatedAppointment, lastErrorObject } =
-                await this.appointmentRepository.findOneAndUpdate(
+        @Arg('ids') { ids }: AppointmentIdsInput
+    ): Promise<boolean> {
+        return Promise.all(
+            ids.map(async (id: string) => {
+                const _id = ObjectId.createFromHexString(id);
+                const appointment = await this.appointmentRepository.findOne({
+                    _id,
+                });
+
+                if (!appointment) {
+                    return Promise.reject(
+                        new Error(`No Appointment ID ${_id}.`)
+                    );
+                }
+                // TODO: UPDATE MULTIPLE TRANSACTION STATUS AT ONCE
+                return this.appointmentRepository.findOneAndUpdate(
                     { _id, 'transactions.status': TransactionStatus.PENDING },
                     {
                         $set: {
@@ -120,18 +122,13 @@ export class AppointmentResolver {
                             'transactions.$.status':
                                 TransactionStatus.CANCELLED,
                         },
-                    },
-                    { returnOriginal: false }
+                    }
                 );
-
-            if (!lastErrorObject.updatedExisting) {
-                return Promise.reject(
-                    new Error(
-                        `Error could not execute the operation. Details: ${lastErrorObject}`
-                    )
-                );
-            }
-            return updatedAppointment;
+            })
+        ).then((result) => {
+            // Make the return more explicit
+            return !result.filter((res) => !res.lastErrorObject.updatedExisting)
+                .length; // At least one mutation failed
         });
     }
 }
