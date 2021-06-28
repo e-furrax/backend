@@ -20,8 +20,6 @@ import { PostgresService } from '@/services/repositories/postgres-service';
 import { Message } from '@/entities/postgres/Message';
 import { User } from '@/entities/postgres/User';
 import { MessageInput } from './MessageInput';
-import { UserInput } from './../user/UserInput';
-import { ConversationsObject } from './ConversationsObject';
 
 @Resolver(() => Message)
 @Service()
@@ -32,6 +30,37 @@ export class MessageResolver {
     constructor(private readonly postgresService: PostgresService) {
         this.repository = this.postgresService.getRepository(Message);
         this.userRepository = this.postgresService.getRepository(User);
+    }
+
+    async findConversationId(
+        fromUser: number,
+        toUser: number
+    ): Promise<number> {
+        const conversationId = await this.repository
+            .createQueryBuilder('message')
+            .select('message.id')
+            .leftJoinAndSelect('message.toUser', 'toUser')
+            .leftJoinAndSelect('message.fromUser', 'fromUser')
+            .where('fromUser.id IN (:...users)', { users: [fromUser, toUser] })
+            .andWhere('toUser.id IN (:...usersAgain)', {
+                usersAgain: [fromUser, toUser],
+            })
+            .getRawOne();
+
+        return conversationId
+            ? conversationId.message_id
+            : (await this.findMaxConversationId()) + 1;
+    }
+
+    async findMaxConversationId(): Promise<number> {
+        const maxConversationId = await this.repository
+            .createQueryBuilder('message')
+            .select('MAX(message.conversationId)', 'max')
+            .getRawOne();
+
+        return maxConversationId && maxConversationId.max
+            ? maxConversationId.max
+            : 0;
     }
 
     @Mutation(() => Boolean)
@@ -51,6 +80,11 @@ export class MessageResolver {
             throw new Error('Could not find toUser');
         }
 
+        const conversationId = await this.findConversationId(
+            fromUser.id,
+            toUserFound.id
+        );
+
         const newMessage = await this.repository.create({
             content,
             fromUser: {
@@ -61,6 +95,7 @@ export class MessageResolver {
                 id: toUserFound.id,
                 username: toUserFound.username,
             },
+            conversationId,
         });
 
         await this.repository.save(newMessage);
@@ -72,33 +107,57 @@ export class MessageResolver {
 
     @Query(() => [Message])
     @UseMiddleware(isAuth)
-    async getConversation(
-        @Ctx() { payload }: MyContext,
-        @Arg('toUser') toUser: UserInput
-    ) {
+    async getConversation(@Arg('conversationId') conversationId: number) {
         return await this.repository.find({
             where: {
-                fromUser: payload?.userId,
-                toUser,
+                conversationId,
             },
             relations: ['fromUser', 'toUser'],
         });
     }
 
-    @Query(() => [ConversationsObject])
+    @Query(() => [Message])
     @UseMiddleware(isAuth)
-    async getConversations(
-        @Ctx() { payload }: MyContext
-    ): Promise<ConversationsObject[]> {
-        return await this.repository
+    async getConversations(@Ctx() { payload }: MyContext): Promise<Message[]> {
+        const conversationsIds = await this.repository
             .createQueryBuilder('message')
-            .select(['toUser.id', 'toUser.username'])
+            .select('message.conversationId')
             .distinct(true)
-            .leftJoinAndSelect('message.toUser', 'toUser')
-            .leftJoinAndSelect('message.fromUser', 'fromUser')
+            .leftJoin('message.toUser', 'toUser')
+            .leftJoin('message.fromUser', 'fromUser')
             .where('fromUser.id = :userId', { userId: payload?.userId })
             .orWhere('toUser.id = :userId2', { userId2: payload?.userId })
             .getRawMany();
+
+        const conversationsLastMessage = [];
+        for (const conversationId of conversationsIds) {
+            const lastMessageId = await this.repository
+                .createQueryBuilder('message')
+                .select('MAX(id)', 'max')
+                .where('message.conversationId = :cid', {
+                    cid: conversationId.message_conversationId,
+                })
+                .getRawOne();
+
+            if (!lastMessageId) {
+                throw new Error('Could not find lastMessageId');
+            }
+
+            const lastMessage = await this.repository.findOne({
+                where: {
+                    id: lastMessageId.max,
+                },
+                relations: ['fromUser', 'toUser'],
+            });
+
+            if (!lastMessage) {
+                throw new Error('Could not find lastMessage');
+            }
+
+            conversationsLastMessage.push(lastMessage);
+        }
+
+        return conversationsLastMessage;
     }
 
     @Subscription({
@@ -110,7 +169,6 @@ export class MessageResolver {
             payload: Message;
             context: MyContext;
         }) => {
-            console.log(messagePayload.toUser.id, context.payload?.userId);
             return messagePayload.toUser.id === context.payload?.userId;
         },
     })
