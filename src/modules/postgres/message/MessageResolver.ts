@@ -169,7 +169,10 @@ export class MessageResolver {
             payload: Message;
             context: MyContext;
         }) => {
-            return messagePayload.toUser.id === context.payload?.userId;
+            return (
+                messagePayload.toUser.id === context.payload?.userId ||
+                messagePayload.fromUser.id === context.payload?.userId
+            );
         },
     })
     @Authorized()
