@@ -45,7 +45,6 @@ async function bootstrapPg() {
             uploads: false,
             subscriptions: {
                 onConnect: (connectionParams) => {
-                    console.log('params', connectionParams);
                     return { extended: connectionParams };
                 },
                 path: '/subscriptions',

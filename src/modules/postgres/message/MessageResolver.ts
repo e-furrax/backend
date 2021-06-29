@@ -38,7 +38,7 @@ export class MessageResolver {
     ): Promise<number> {
         const conversationId = await this.repository
             .createQueryBuilder('message')
-            .select('message.id')
+            .select('message.conversationId')
             .leftJoinAndSelect('message.toUser', 'toUser')
             .leftJoinAndSelect('message.fromUser', 'fromUser')
             .where('fromUser.id IN (:...users)', { users: [fromUser, toUser] })
@@ -48,7 +48,7 @@ export class MessageResolver {
             .getRawOne();
 
         return conversationId
-            ? conversationId.message_id
+            ? conversationId.message_conversationId
             : (await this.findMaxConversationId()) + 1;
     }
 
@@ -156,6 +156,13 @@ export class MessageResolver {
 
             conversationsLastMessage.push(lastMessage);
         }
+
+        conversationsLastMessage.sort((m1, m2) => {
+            return (
+                new Date(m2.createdAt).getTime() -
+                new Date(m1.createdAt).getTime()
+            );
+        });
 
         return conversationsLastMessage;
     }
