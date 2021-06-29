@@ -98,10 +98,16 @@ export class UserResolver {
         );
     }
 
-    @Query(() => String)
+    @Query(() => User)
     @UseMiddleware(isAuth)
-    async me(@Ctx() { payload }: MyContext): Promise<string> {
-        return `Your user id : ${payload?.userId}`;
+    async me(@Ctx() { payload }: MyContext): Promise<User> {
+        const user = await this.repository.findOne(payload?.userId);
+
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        return user;
     }
 
     @Mutation(() => User)

@@ -17,6 +17,10 @@ export class Message extends BaseEntity {
     readonly id: number;
 
     @Field()
+    @Column({ nullable: false })
+    readonly conversationId: number;
+
+    @Field()
     @Column()
     content: string;
 
