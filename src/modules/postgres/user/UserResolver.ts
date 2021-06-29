@@ -150,7 +150,7 @@ export class UserResolver {
 
         return {
             accessToken: sign({ userId: user.id }, 's3cr3tk3y', {
-                expiresIn: '15m',
+                expiresIn: '1y',
             }),
         };
     }
@@ -175,7 +175,7 @@ export class UserResolver {
 
         return {
             accessToken: sign({ userId }, 's3cr3tk3y', {
-                expiresIn: '15m',
+                expiresIn: '1y',
             }),
         };
     }
