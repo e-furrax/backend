@@ -97,40 +97,34 @@ export class AppointmentResolver {
         return updatedAppointment;
     }
 
-    @Mutation(() => [Appointment])
-    deleteAppointment(
+    @Mutation(() => Boolean)
+    async deleteAppointment(
         @Arg('payload') { ids }: AppointmentIdsInput
-    ): Promise<Appointment[]> {
-        return Promise.all(
-            ids.map(async (id: string) => {
-                const _id = ObjectId.createFromHexString(id);
-                const appointment = await this.appointmentRepository.findOne({
-                    _id,
-                });
-
-                if (!appointment) {
-                    return Promise.reject(
-                        new Error(`No Appointment ID ${_id}.`)
-                    );
-                }
-                // TODO: UPDATE MULTIPLE TRANSACTION STATUS AT ONCE
-                return this.appointmentRepository.findOneAndUpdate(
-                    { _id, 'transactions.status': TransactionStatus.PENDING },
-                    {
-                        $set: {
-                            status: AppointmentStatus.CANCELLED,
-                            'transactions.$.status':
-                                TransactionStatus.CANCELLED,
-                        },
+    ): Promise<boolean> {
+        try {
+            const appointmentIds = ids.map((id) => ({
+                _id: ObjectId.createFromHexString(id),
+            }));
+            const { result } = await this.appointmentRepository.updateMany(
+                { $or: [...appointmentIds] },
+                {
+                    $set: {
+                        status: AppointmentStatus.CANCELLED,
+                        'transactions.$[elem].status':
+                            TransactionStatus.CANCELLED,
                     },
-                    { returnOriginal: false }
-                );
-            })
-        ).then((updatedAppointments) => {
-            const res = updatedAppointments
-                .filter((appointment) => appointment.value !== null)
-                .map((res) => res.value);
-            return res;
-        });
+                },
+                {
+                    arrayFilters: [
+                        { 'elem.status': TransactionStatus.PENDING },
+                    ],
+                    upsert: false,
+                } as any
+            );
+            // Return could be more explicit
+            return !!result.ok;
+        } catch (e) {
+            return false;
+        }
     }
 }
