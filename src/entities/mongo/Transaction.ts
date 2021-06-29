@@ -7,13 +7,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
 } from 'typeorm';
-
-enum Status {
-    PENDING = 'PENDING',
-    ACCEPTED = 'ACCEPTED',
-    REJECTED = 'REJECTED',
-    CANCELLED = 'CANCELLED',
-}
+import { TransactionStatus as Status } from '@/services/enum/transactionStatus';
 
 @ObjectType()
 @Entity()
@@ -34,7 +28,7 @@ export class Transaction {
     @Column()
     readonly price: number;
 
-    @Field()
+    @Field(() => Status)
     @Column('string')
     public status: Status;
 
@@ -42,9 +36,9 @@ export class Transaction {
     @Column({ nullable: true })
     public description?: string;
 
-    constructor(price: number, description: string, status = Status.PENDING) {
+    constructor(price: number, description: string) {
         this.price = price;
         this.description = description;
-        this.status = status;
+        this.status = Status.PENDING;
     }
 }

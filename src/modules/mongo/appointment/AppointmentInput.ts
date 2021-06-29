@@ -21,6 +21,12 @@ export class AppointmentInput implements Partial<Appointment> {
 }
 
 @InputType()
+export class AppointmentIdsInput {
+    @Field(() => [String])
+    ids: string[];
+}
+
+@InputType()
 export class TransactionInput implements Partial<Transaction> {
     @Field()
     public price: number;

@@ -8,6 +8,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { Transaction } from './Transaction';
+import { AppointmentStatus as Status } from '@/services/enum/appointmentStatus';
 
 @ObjectType()
 @Entity()
@@ -36,14 +37,24 @@ export class Appointment {
     @Column()
     public title: string;
 
+    @Field(() => Status)
+    @Column('string')
+    public status: Status;
+
     @Field(() => [Transaction])
     @Column(() => Transaction)
     public transactions: Transaction[];
 
-    constructor(from: number, to: number, title: string) {
+    constructor(
+        from: number,
+        to: number,
+        title: string,
+        status = Status.PENDING
+    ) {
         this.from = from;
         this.to = to;
         this.title = title;
         this.transactions = [];
+        this.status = status;
     }
 }

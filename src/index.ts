@@ -105,6 +105,7 @@ async function bootstrapMongo() {
         const schema = await TypeGraphQL.buildSchema({
             resolvers: MongoResolvers,
             container: Container,
+            authChecker: customAuthChecker,
         });
 
         const server = new ApolloServer({
@@ -116,7 +117,7 @@ async function bootstrapMongo() {
 
         mongoApp.listen(4000, () => {
             console.log(
-                'Mongo Server is running, GraphQL Playground available at http://localhost:4000/graphql'
+                '🚀 Mongo Server is running, GraphQL Playground available at http://localhost:4000/graphql'
             );
         });
     } catch (err) {

@@ -8,7 +8,7 @@ import {
 } from 'type-graphql';
 import { ObjectId } from 'mongodb';
 import { Service } from 'typedi';
-import { DeleteWriteOpResultObject, MongoRepository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
@@ -18,24 +18,27 @@ import { Appointment } from '@/entities/mongo/Appointment';
 import { Transaction } from '@/entities/mongo/Transaction';
 import {
     AppointmentInput,
+    AppointmentIdsInput,
     TransactionInput,
 } from '@/modules/mongo/appointment/AppointmentInput';
+import { AppointmentStatus } from '@/services/enum/appointmentStatus';
+import { TransactionStatus } from '@/services/enum/transactionStatus';
 
 @Service()
 @Resolver(() => Appointment)
 export class AppointmentResolver {
-    private repositoryAppointment: MongoRepository<Appointment>;
-    private repositoryTransaction: MongoRepository<Transaction>;
+    private appointmentRepository: MongoRepository<Appointment>;
+    private transactionRepository: MongoRepository<Transaction>;
 
     constructor(private readonly mongoService: MongoService) {
-        this.repositoryAppointment =
+        this.appointmentRepository =
             this.mongoService.getRepository(Appointment);
-        this.repositoryTransaction =
+        this.transactionRepository =
             this.mongoService.getRepository(Transaction);
     }
     @Query(() => [Appointment])
     async getAppointments(): Promise<Appointment[]> {
-        return this.repositoryAppointment.find();
+        return this.appointmentRepository.find();
     }
 
     @Query(() => [Appointment], { nullable: true })
@@ -45,7 +48,7 @@ export class AppointmentResolver {
         if (!from) {
             return Promise.reject(new Error('Missing User ID'));
         }
-        return this.repositoryAppointment.find({ from });
+        return this.appointmentRepository.find({ from });
     }
 
     @Mutation(() => Appointment)
@@ -60,7 +63,7 @@ export class AppointmentResolver {
         }
 
         const appointment = new Appointment(fromUser, to, title);
-        return this.repositoryAppointment.save(appointment);
+        return this.appointmentRepository.save(appointment);
     }
 
     @Mutation(() => Appointment)
@@ -70,37 +73,58 @@ export class AppointmentResolver {
         @Arg('transactionInput') { price, description }: TransactionInput
     ): Promise<Appointment> {
         const _id = ObjectId.createFromHexString(id);
-        const transaction = await this.repositoryTransaction.save(
+        const transaction = await this.transactionRepository.save(
             new Transaction(price, description)
         );
-        const result = await this.repositoryAppointment.findOneAndUpdate(
-            { _id },
-            {
-                $push: {
-                    transactions: transaction,
+        const { value: updatedAppointment, lastErrorObject } =
+            await this.appointmentRepository.findOneAndUpdate(
+                { _id },
+                {
+                    $push: {
+                        transactions: transaction,
+                    },
                 },
-            },
-            { returnOriginal: false }
-        );
+                { returnOriginal: false }
+            );
 
-        if (!result.lastErrorObject.updatedExisting) {
-            return Promise.reject(new Error(`No Appointment ID ${id} found.`));
+        if (!lastErrorObject?.updatedExisting) {
+            return Promise.reject(
+                new Error(
+                    `Error could not execute the operation. Details: ${lastErrorObject}`
+                )
+            );
         }
-        return result.value;
+        return updatedAppointment;
     }
 
     @Mutation(() => Boolean)
-    @UseMiddleware(isAuth)
     async deleteAppointment(
-        @Arg('appointmentId') id: string
-    ): Promise<DeleteWriteOpResultObject> {
-        const _id = ObjectId.createFromHexString(id);
-        const appointment = await this.repositoryAppointment.findOne({
-            _id,
-        });
-        if (!appointment) {
-            return Promise.reject(new Error(`No Appointment ID ${_id}.`));
+        @Arg('payload') { ids }: AppointmentIdsInput
+    ): Promise<boolean> {
+        try {
+            const appointmentIds = ids.map((id) => ({
+                _id: ObjectId.createFromHexString(id),
+            }));
+            const { result } = await this.appointmentRepository.updateMany(
+                { $or: [...appointmentIds] },
+                {
+                    $set: {
+                        status: AppointmentStatus.CANCELLED,
+                        'transactions.$[elem].status':
+                            TransactionStatus.CANCELLED,
+                    },
+                },
+                {
+                    arrayFilters: [
+                        { 'elem.status': TransactionStatus.PENDING },
+                    ],
+                    upsert: false,
+                } as any
+            );
+            // Return could be more explicit
+            return !!result.ok;
+        } catch (e) {
+            return false;
         }
-        return this.repositoryAppointment.deleteOne(appointment);
     }
 }
