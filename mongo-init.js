@@ -7,4 +7,5 @@ db.createUser({
 			db: 'furrax',
 		},
 	],
+	passwordDigestor: 'server'
 });
