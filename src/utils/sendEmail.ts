@@ -11,7 +11,7 @@ export async function sendEmail(email: string, code: string) {
                   service: 'gmail',
                   auth: {
                       user: process.env.GMAIL_USER,
-                      pass: process.env.GMAIL_PASS,
+                      pass: process.env.GMAIL_PASSWORD,
                   },
               })
             : createTransport({
