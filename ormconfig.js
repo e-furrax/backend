@@ -14,6 +14,7 @@ module.exports = [
         type: 'mongodb',
         entities: ['dist/entities/mongo/*.js'],
         url: process.env.MONGO_DATABASE_URL || 'mongodb://furrax:furrax@mongo_container:27017/furrax',
+        authSource: 'furrax',
         logger: 'advanced-console',
         logging: true,
         useUnifiedTopology: true
