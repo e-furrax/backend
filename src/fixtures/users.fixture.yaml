@@ -6,18 +6,37 @@ items:
         description: '{{lorem.paragraph}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
         gender: 'male'
-        status: 1
+        status: 2
+        role: 'user'
     user1:
         username: xavier
         email: xavier@gmail.com
         description: '{{lorem.paragraph}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
         gender: 'male'
-        status: 1
+        status: 2
+        role: 'user'
     user2:
-        username: jean
-        email: jean@gmail.com
+        username: paul
+        email: paul@gmail.com
         description: '{{lorem.paragraph}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
         gender: 'male'
-        status: 1
+        status: 2
+        role: 'furrax'
+    user3:
+        username: jacques
+        email: jacques@gmail.com
+        description: '{{lorem.paragraph}}'
+        password: '$2y$12$nXnajHcdoPYUrKqHzF6SYesfeIuGeAf6MSmY70MkPeZoJQZQYIotq'
+        gender: 'male'
+        status: 2
+        role: 'admin'
+    user4:
+        username: louis
+        email: louis@gmail.com
+        description: '{{lorem.paragraph}}'
+        password: '$2y$12$nXnajHcdoPYUrKqHzF6SYesfeIuGeAf6MSmY70MkPeZoJQZQYIotq'
+        gender: 'male'
+        status: 2
+        role: 'moderator'

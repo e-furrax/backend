@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
 import {
     Column,
     Entity,
@@ -8,7 +8,17 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { Transaction } from './Transaction';
-import { AppointmentStatus as Status } from '@/services/enum/appointmentStatus';
+
+export enum AppointmentStatus {
+    CANCELLED = 'CANCELLED',
+    PENDING = 'PENDING',
+    DONE = 'DONE',
+}
+
+registerEnumType(AppointmentStatus, {
+    name: 'AppointmentStatus',
+    description: 'Basic appointment status',
+});
 
 @ObjectType()
 @Entity()
@@ -37,9 +47,9 @@ export class Appointment {
     @Column()
     public title: string;
 
-    @Field(() => Status)
+    @Field(() => AppointmentStatus)
     @Column('string')
-    public status: Status;
+    public status: AppointmentStatus;
 
     @Field(() => [Transaction])
     @Column(() => Transaction)
@@ -49,7 +59,7 @@ export class Appointment {
         from: number,
         to: number,
         title: string,
-        status = Status.PENDING
+        status = AppointmentStatus.PENDING
     ) {
         this.from = from;
         this.to = to;

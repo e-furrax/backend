@@ -8,4 +8,5 @@ export interface MyContext {
 
 export interface MyContextPayload {
     userId: number;
+    role: string;
 }

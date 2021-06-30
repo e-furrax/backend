@@ -8,6 +8,7 @@ import {
     Ctx,
     ObjectType,
     Field,
+    Authorized,
 } from 'type-graphql';
 import { Repository, In } from 'typeorm';
 import { Service } from 'typedi';
@@ -16,12 +17,13 @@ import { sign } from 'jsonwebtoken';
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { User, Status } from '@/entities/postgres/User';
+import { User, Status, UserRole } from '@/entities/postgres/User';
 import { Language } from '@/entities/postgres/Language';
 import { Game } from '@/entities/postgres/Game';
 import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
 import { GamesInput } from '@/modules/postgres/game/GamesInput';
 import { UserInput } from './UserInput';
+import { PromotionInput } from './PromotionInput';
 import { sendEmail } from '@/utils/sendEmail';
 import { createConfirmationCode } from '@/utils/createConfirmationCode';
 import { redis } from '@/redis';
@@ -58,7 +60,7 @@ export class UserResolver {
             .leftJoinAndSelect('user.languages', 'languages')
             .leftJoinAndSelect('user.receivedRatings', 'receivedRatings')
             .leftJoinAndSelect('user.games', 'games')
-            .where('user.status = :status', { status: Status.Verified });
+            .where('user.status = :status', { status: Status.VERIFIED });
 
         if (data && data.languages) {
             usersQuery.andWhere('languages.id IN(:...languagesIds)', {
@@ -77,8 +79,7 @@ export class UserResolver {
                 gender: data.gender,
             });
         }
-
-        return await usersQuery.getMany();
+        return usersQuery.getMany();
     }
 
     @Query(() => User, { nullable: true })
@@ -102,7 +103,6 @@ export class UserResolver {
     @UseMiddleware(isAuth)
     async me(@Ctx() { payload }: MyContext): Promise<User> {
         const user = await this.repository.findOne(payload?.userId);
-
         if (!user) {
             throw new Error('Could not find user');
         }
@@ -126,10 +126,9 @@ export class UserResolver {
             gender,
             availability: availability,
         });
-        user.status = Status.Verified;
+        user.status = Status.VERIFIED;
 
-        await this.repository.save(user);
-
+        this.repository.save(user);
         // await sendEmail(email, await createConfirmationCode(user.id));
         return user;
     }
@@ -150,14 +149,18 @@ export class UserResolver {
             throw new Error('Wrong password');
         }
 
-        if (user.status < Status.Verified) {
+        if (user.status !== Status.VERIFIED) {
             throw new Error('Registration incomplete');
         }
 
         return {
-            accessToken: sign({ userId: user.id }, 's3cr3tk3y', {
-                expiresIn: '1y',
-            }),
+            accessToken: sign(
+                { userId: user.id, role: user.role },
+                's3cr3tk3y',
+                {
+                    expiresIn: '1y',
+                }
+            ),
         };
     }
 
@@ -173,14 +176,14 @@ export class UserResolver {
         if (!user) {
             throw new Error('User not found');
         }
-        user.status = Status.Verified;
+        user.status = Status.VERIFIED;
         await this.repository.save(user);
 
-        // await User.update({ id: +userId }, { status: Status.Verified });
+        // await User.update({ id: +userId }, { status: Status.VERIFIED });
         await redis.del(code);
 
         return {
-            accessToken: sign({ userId }, 's3cr3tk3y', {
+            accessToken: sign({ userId, role: user.role }, 's3cr3tk3y', {
                 expiresIn: '1y',
             }),
         };
@@ -271,5 +274,33 @@ export class UserResolver {
         await this.repository.save(user);
 
         return user;
+    }
+
+    @Mutation(() => User)
+    @UseMiddleware(isAuth)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
+    async updateRole(
+        @Ctx() { payload: currentUser }: MyContext,
+        @Arg('promotion') { id, role }: PromotionInput
+    ): Promise<User> {
+        const user = (await this.repository.findOne({ id })) as User;
+        if (
+            currentUser?.role === UserRole.MODERATOR &&
+            (user.role === UserRole.MODERATOR || user.role === UserRole.ADMIN)
+        ) {
+            throw new Error(
+                'Access denied! Action not permitted for this user'
+            );
+        }
+        if (
+            currentUser?.role === UserRole.MODERATOR &&
+            (role === UserRole.MODERATOR || role === UserRole.ADMIN)
+        ) {
+            throw new Error(
+                "Access denied! You don't have permission for this action!"
+            );
+        }
+        user.role = role;
+        return this.repository.save(user);
     }
 }

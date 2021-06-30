@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
 import {
     Column,
     Entity,
@@ -7,7 +7,18 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { TransactionStatus as Status } from '@/services/enum/transactionStatus';
+
+export enum TransactionStatus {
+    CANCELLED = 'CANCELLED',
+    REJECTED = 'PAIEMENT_REJECTED',
+    PENDING = 'PENDING',
+    VALIDATED = 'PAIEMENT_VALIDATED',
+}
+
+registerEnumType(TransactionStatus, {
+    name: 'TransactionStatus',
+    description: 'Basic transaction status',
+});
 
 @ObjectType()
 @Entity()
@@ -28,9 +39,9 @@ export class Transaction {
     @Column()
     readonly price: number;
 
-    @Field(() => Status)
+    @Field(() => TransactionStatus)
     @Column('string')
-    public status: Status;
+    public status: TransactionStatus;
 
     @Field()
     @Column({ nullable: true })
@@ -39,6 +50,6 @@ export class Transaction {
     constructor(price: number, description: string) {
         this.price = price;
         this.description = description;
-        this.status = Status.PENDING;
+        this.status = TransactionStatus.PENDING;
     }
 }
