@@ -107,6 +107,7 @@ export class MessageResolver {
 
     @Query(() => [Message])
     @UseMiddleware(isAuth)
+    @Authorized()
     async getConversation(@Arg('conversationId') conversationId: number) {
         return await this.repository.find({
             where: {
@@ -118,6 +119,7 @@ export class MessageResolver {
 
     @Query(() => [Message])
     @UseMiddleware(isAuth)
+    @Authorized()
     async getConversations(@Ctx() { payload }: MyContext): Promise<Message[]> {
         const conversationsIds = await this.repository
             .createQueryBuilder('message')

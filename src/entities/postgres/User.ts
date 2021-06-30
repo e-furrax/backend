@@ -17,14 +17,26 @@ import { Availability } from './Availability';
 import { Message } from './Message';
 
 export enum Status {
-    Unverified,
-    Verified,
-    Incomplete,
+    INCOMPLETE,
+    UNVERIFIED,
+    VERIFIED,
 }
 
 registerEnumType(Status, {
     name: 'Status',
     description: 'The user statuses',
+});
+
+export enum UserRole {
+    USER = 'user',
+    FURRAX = 'furrax',
+    MODERATOR = 'moderator',
+    ADMIN = 'admin',
+}
+
+registerEnumType(UserRole, {
+    name: 'Role',
+    description: 'Basic user role',
 });
 
 @Entity()
@@ -53,8 +65,12 @@ export class User extends BaseEntity {
     @Column()
     password: string;
 
+    @Field(() => UserRole)
+    @Column('text', { default: UserRole.USER })
+    role: UserRole;
+
     @Field(() => Status)
-    @Column('int', { default: 0 })
+    @Column('int', { default: Status.VERIFIED })
     status: Status;
 
     @Field({ nullable: true })

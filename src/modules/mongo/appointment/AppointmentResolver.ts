@@ -5,6 +5,7 @@ import {
     Arg,
     Ctx,
     UseMiddleware,
+    Authorized,
 } from 'type-graphql';
 import { ObjectId } from 'mongodb';
 import { Service } from 'typedi';
@@ -14,15 +15,14 @@ import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
 import { MongoService } from '@/services/repositories/mongo-service';
 
-import { Appointment } from '@/entities/mongo/Appointment';
-import { Transaction } from '@/entities/mongo/Transaction';
+import { UserRole } from '@/entities/postgres/User';
+import { Appointment, AppointmentStatus } from '@/entities/mongo/Appointment';
+import { Transaction, TransactionStatus } from '@/entities/mongo/Transaction';
 import {
     AppointmentInput,
     AppointmentIdsInput,
     TransactionInput,
 } from '@/modules/mongo/appointment/AppointmentInput';
-import { AppointmentStatus } from '@/services/enum/appointmentStatus';
-import { TransactionStatus } from '@/services/enum/transactionStatus';
 
 @Service()
 @Resolver(() => Appointment)
@@ -37,6 +37,7 @@ export class AppointmentResolver {
             this.mongoService.getRepository(Transaction);
     }
     @Query(() => [Appointment])
+    @Authorized([UserRole.FURRAX, UserRole.MODERATOR])
     async getAppointments(): Promise<Appointment[]> {
         return this.appointmentRepository.find();
     }

@@ -110,7 +110,18 @@ async function bootstrapMongo() {
 
         const server = new ApolloServer({
             schema,
-            context: ({ req, res }) => ({ req, res }),
+            context: ({ req, res, connection }) => {
+                if ((!req || !req.headers) && connection) {
+                    return connection.context;
+                }
+                return { req, res, connection };
+            },
+            subscriptions: {
+                onConnect: (connectionParams) => ({
+                    extended: connectionParams,
+                }),
+                path: '/subscriptions',
+            },
         });
 
         server.applyMiddleware({ app: mongoApp, path: GQLpath });
