@@ -21,5 +21,5 @@ export const customAuthChecker: AuthChecker<any> = (
         return false;
     }
 
-    return !roles.length || roles.includes(`${userRole}`);
+    return !roles.length || roles.includes(userRole);
 };
