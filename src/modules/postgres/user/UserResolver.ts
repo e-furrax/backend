@@ -119,17 +119,16 @@ export class UserResolver {
         const availability = new Availability();
         await this.availabilityRepository.save(availability);
 
-        const user = await this.repository.create({
+        const user = this.repository.create({
             username,
             email,
             password: hashedPassword,
             gender,
-            availability: availability,
+            availability,
         });
-        user.status = Status.VERIFIED;
 
-        this.repository.save(user);
-        // await sendEmail(email, await createConfirmationCode(user.id));
+        await this.repository.save(user);
+        await sendEmail(email, await createConfirmationCode(user.id));
         return user;
     }
 
@@ -179,7 +178,6 @@ export class UserResolver {
         user.status = Status.VERIFIED;
         await this.repository.save(user);
 
-        // await User.update({ id: +userId }, { status: Status.VERIFIED });
         await redis.del(code);
 
         return {
