@@ -90,7 +90,7 @@ export class ProfileResolver {
         return true;
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => String)
     @UseMiddleware(isAuth)
     async updateProfilePic(
         @Ctx() { payload }: MyContext,
