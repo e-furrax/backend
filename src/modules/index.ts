@@ -6,6 +6,7 @@ import { SearchResolver } from './postgres/search/SearchResolver';
 import { RatingResolver } from './postgres/rating/RatingResolver';
 import { MessageResolver } from './postgres/message/MessageResolver';
 import { AvailabilityResolver } from './postgres/availability/AvailabilityResolver';
+import { StatisticResolver } from './postgres/statistic/StatisticResolver';
 
 import { AppointmentResolver } from './mongo/appointment/AppointmentResolver';
 
@@ -18,5 +19,6 @@ export const PostgresResolvers = [
     RatingResolver,
     MessageResolver,
     AvailabilityResolver,
+    StatisticResolver,
 ] as const;
 export const MongoResolvers = [AppointmentResolver] as const;

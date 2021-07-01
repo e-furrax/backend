@@ -30,6 +30,7 @@ import { redis } from '@/redis';
 import { FilterInput } from './FilterInput';
 import { RegisterInput } from './register/RegisterInput';
 import { Availability } from '@/entities/postgres/Availability';
+import { Statistic } from '@/entities/postgres/Statistic';
 
 @ObjectType()
 class LoginResponse {
@@ -42,7 +43,7 @@ class LoginResponse {
 export class UserResolver {
     private repository: Repository<User>;
     private languageRepository: Repository<Language>;
-    private gameRepository: Repository<Language>;
+    private gameRepository: Repository<Game>;
     private availabilityRepository: Repository<Availability>;
 
     constructor(private readonly postgresService: PostgresService) {
@@ -94,6 +95,7 @@ export class UserResolver {
                     'givenRatings.toUser',
                     'languages',
                     'games',
+                    'statistics',
                 ],
             }
         );
@@ -276,6 +278,27 @@ export class UserResolver {
 
     @Mutation(() => User)
     @UseMiddleware(isAuth)
+    async removeUserGame(
+        @Ctx() { payload }: MyContext,
+        @Arg('id') gameId: number
+    ): Promise<User> {
+        const user = await this.repository.findOne(payload?.userId, {
+            relations: ['games'],
+        });
+
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        const filteredGames = user.games.filter((game) => game.id !== gameId);
+
+        user.games = filteredGames;
+
+        return await this.repository.save(user);
+    }
+
+    @Mutation(() => User)
+    @UseMiddleware(isAuth)
     @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async updateRole(
         @Ctx() { payload: currentUser }: MyContext,
@@ -300,5 +323,19 @@ export class UserResolver {
         }
         user.role = role;
         return this.repository.save(user);
+    }
+
+    @Query(() => [Statistic])
+    @UseMiddleware(isAuth)
+    async getStatistics(@Ctx() { payload }: MyContext): Promise<Statistic[]> {
+        const user = await this.repository.findOne(payload?.userId, {
+            relations: ['statistics'],
+        });
+
+        if (!user) {
+            throw new Error('Cannot find user');
+        }
+
+        return user.statistics;
     }
 }
