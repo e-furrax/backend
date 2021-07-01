@@ -96,7 +96,7 @@ export class ProfileResolver {
         @Ctx() { payload }: MyContext,
         @Arg('picture', () => GraphQLUpload)
         { createReadStream, filename, mimetype }: FileUpload
-    ): Promise<boolean> {
+    ): Promise<string> {
         const user = await this.repository.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
@@ -110,6 +110,6 @@ export class ProfileResolver {
         user.profileImage = uri;
         await this.repository.save(user);
 
-        return true;
+        return uri;
     }
 }
