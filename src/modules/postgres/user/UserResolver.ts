@@ -337,8 +337,6 @@ export class UserResolver {
             throw new Error('Cannot find user');
         }
 
-        console.log(user.statistics);
-
         return user.statistics;
     }
 }
