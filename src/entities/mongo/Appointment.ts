@@ -52,6 +52,14 @@ export class Appointment extends BaseEntity {
     @Column()
     description: string;
 
+    @Field()
+    @Column()
+    matches: number;
+
+    @Field()
+    @Column()
+    game: string;
+
     @Field(() => AppointmentStatus)
     @Column('string', { default: AppointmentStatus.PENDING })
     status: AppointmentStatus;

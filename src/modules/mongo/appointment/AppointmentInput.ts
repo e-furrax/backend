@@ -20,6 +20,12 @@ export class AppointmentInput implements Partial<Appointment> {
 
     @Field()
     description: string;
+
+    @Field()
+    matches: number;
+
+    @Field()
+    game: string;
 }
 
 @InputType()

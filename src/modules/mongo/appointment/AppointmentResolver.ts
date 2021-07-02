@@ -67,7 +67,7 @@ export class AppointmentResolver {
     async createAppointment(
         @Ctx() { payload }: MyContext,
         @Arg('appointmentInput')
-        { from, to, date, description }: AppointmentInput
+        { from, to, date, description, matches, game }: AppointmentInput
     ): Promise<Appointment> {
         const fromUser = from || payload?.userId; // User ID is given by request parameter ex: admin created appointment or by token ex: User created appointment
         if (!fromUser) {
@@ -77,12 +77,13 @@ export class AppointmentResolver {
         const user = await this.userRepository.findOne(fromUser);
         const furrax = await this.userRepository.findOne(to);
 
-        // const appointment = new Appointment(fromUser, to, date, description);
         const appointment = this.appointmentRepository.create({
             from: fromUser,
             to,
             date,
             description,
+            matches,
+            game,
         });
 
         try {
