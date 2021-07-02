@@ -96,6 +96,7 @@ export class UserResolver {
                     'languages',
                     'games',
                     'statistics',
+                    'statistics.game',
                 ],
             }
         );
@@ -329,12 +330,14 @@ export class UserResolver {
     @UseMiddleware(isAuth)
     async getStatistics(@Ctx() { payload }: MyContext): Promise<Statistic[]> {
         const user = await this.repository.findOne(payload?.userId, {
-            relations: ['statistics'],
+            relations: ['statistics', 'statistics.game'],
         });
 
         if (!user) {
             throw new Error('Cannot find user');
         }
+
+        console.log(user.statistics);
 
         return user.statistics;
     }

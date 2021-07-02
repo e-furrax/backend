@@ -12,12 +12,11 @@ import { Service } from 'typedi';
 import { isAuth } from '@/middlewares/isAuth';
 import { MyContext } from '@/types/MyContext';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { Message } from '@/entities/postgres/Message';
 import { UserRole } from '@/entities/postgres/User';
 import { Statistic } from '@/entities/postgres/Statistic';
 import { StatisticInput } from './StatisticInput';
 
-@Resolver(() => Message)
+@Resolver(() => Statistic)
 @Service()
 export class StatisticResolver {
     private repository: Repository<Statistic>;
@@ -30,18 +29,11 @@ export class StatisticResolver {
     @UseMiddleware(isAuth)
     async upsertStatistic(
         @Ctx() { payload }: MyContext,
-        @Arg('data') { mode, game, rank, playerId }: StatisticInput
+        @Arg('data') { id, mode, game, rank, playerId }: StatisticInput
     ): Promise<Statistic> {
-        const statisticFound = await this.repository.findOne({
-            where: {
-                game,
-                user: payload?.userId,
-            },
-        });
-
-        if (statisticFound) {
+        if (id) {
             return await this.repository.save({
-                id: statisticFound.id,
+                id,
                 mode,
                 game,
                 rank,
@@ -62,7 +54,12 @@ export class StatisticResolver {
 
     @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
-    @Authorized([UserRole.ADMIN, UserRole.MODERATOR, UserRole.FURRAX])
+    @Authorized([
+        UserRole.ADMIN,
+        UserRole.MODERATOR,
+        UserRole.FURRAX,
+        UserRole.USER,
+    ])
     async deleteStatistic(
         @Ctx() { payload }: MyContext,
         @Arg('id') id: number
