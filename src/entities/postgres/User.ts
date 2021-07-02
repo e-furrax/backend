@@ -15,6 +15,7 @@ import { Language } from './Language';
 import { Game } from './Game';
 import { Availability } from './Availability';
 import { Message } from './Message';
+import { Statistic } from './Statistic';
 
 export enum Status {
     INCOMPLETE,
@@ -107,4 +108,8 @@ export class User extends BaseEntity {
     @OneToOne(() => Availability)
     @JoinColumn()
     availability: Availability;
+
+    @Field(() => [Statistic], { defaultValue: [] })
+    @OneToMany(() => Statistic, (statistic) => statistic.user)
+    statistics: Statistic[];
 }
