@@ -6,6 +6,7 @@ import {
     ObjectIdColumn,
     CreateDateColumn,
     UpdateDateColumn,
+    BaseEntity,
 } from 'typeorm';
 import { Transaction } from './Transaction';
 
@@ -22,7 +23,7 @@ registerEnumType(AppointmentStatus, {
 
 @ObjectType()
 @Entity()
-export class Appointment {
+export class Appointment extends BaseEntity {
     @Field(() => ID)
     @ObjectIdColumn()
     readonly _id: ObjectId;
@@ -35,36 +36,27 @@ export class Appointment {
     @UpdateDateColumn()
     _updatedAt: Date;
 
-    @Field()
+    @Field({ nullable: true })
     @Column()
-    public from: number;
+    from: number;
 
     @Field()
     @Column()
-    public to: number;
+    to: number;
 
     @Field()
     @Column()
-    public title: string;
+    date: Date;
+
+    @Field()
+    @Column()
+    description: string;
 
     @Field(() => AppointmentStatus)
-    @Column('string')
-    public status: AppointmentStatus;
+    @Column('string', { default: AppointmentStatus.PENDING })
+    status: AppointmentStatus;
 
     @Field(() => [Transaction])
     @Column(() => Transaction)
-    public transactions: Transaction[];
-
-    constructor(
-        from: number,
-        to: number,
-        title: string,
-        status = AppointmentStatus.PENDING
-    ) {
-        this.from = from;
-        this.to = to;
-        this.title = title;
-        this.transactions = [];
-        this.status = status;
-    }
+    transactions: Transaction[];
 }

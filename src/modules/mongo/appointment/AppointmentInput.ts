@@ -7,17 +7,19 @@ import { Transaction } from '@/entities/mongo/Transaction';
 
 @InputType()
 export class AppointmentInput implements Partial<Appointment> {
-    @Field()
-    @Length(2, 40)
-    public title: string;
-
     @Field({ nullable: true })
     @isExistingUser({ message: 'User ID $value for variable `from` not found' })
-    public from?: number;
+    from?: number;
 
     @Field()
     @isExistingUser({ message: 'User ID $value for variable `to` not found' })
-    public to: number;
+    to: number;
+
+    @Field()
+    date: Date;
+
+    @Field()
+    description: string;
 }
 
 @InputType()
@@ -29,8 +31,8 @@ export class AppointmentIdsInput {
 @InputType()
 export class TransactionInput implements Partial<Transaction> {
     @Field()
-    public price: number;
+    price: number;
 
     @Length(5, 128)
-    public description: string;
+    description: string;
 }
