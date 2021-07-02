@@ -19,6 +19,7 @@ import {
 } from '@/entities/postgres/PromotionDemand';
 import { User, UserRole } from '@/entities/postgres/User';
 import { PromotionInput, DemandeStatusInput } from './PromotionInput';
+import { UserInput } from './UserInput';
 
 @Resolver(() => PromotionDemand)
 @Service()
@@ -35,11 +36,14 @@ export class PromotionDemandResolver {
     @Query(() => [PromotionDemand])
     @UseMiddleware(isAuth)
     @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
-    async getDemands(): Promise<PromotionDemand[]> {
+    async getDemands(
+        @Arg('userInput') { id }: UserInput
+    ): Promise<PromotionDemand> {
         return this.promotionRepository
             .createQueryBuilder('promotionDemand')
             .leftJoinAndSelect('promotionDemand.user', 'user')
-            .getMany();
+            .where('user.id = :id', { id })
+            .getOneOrFail();
     }
 
     @Query(() => [PromotionDemand])

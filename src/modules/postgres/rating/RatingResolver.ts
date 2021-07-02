@@ -5,16 +5,17 @@ import {
     UseMiddleware,
     Ctx,
     Query,
+    Authorized,
 } from 'type-graphql';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Service } from 'typedi';
 
 import { isAuth } from '@/middlewares/isAuth';
 import { MyContext } from '@/types/MyContext';
 import { PostgresService } from '@/services/repositories/postgres-service';
 import { Rating } from '@/entities/postgres/Rating';
-import { User } from '@/entities/postgres/User';
-import { RatingInput } from './RatingInput';
+import { User, UserRole } from '@/entities/postgres/User';
+import { RatingInput, RatingIdsInput } from './RatingInput';
 
 @Resolver(() => Rating)
 @Service()
@@ -61,5 +62,14 @@ export class RatingResolver {
         return await this.repository.find({
             relations: ['fromUser', 'toUser'],
         });
+    }
+
+    @Mutation(() => Rating)
+    @UseMiddleware(isAuth)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
+    async removeRating(
+        @Arg('ratings') { ids }: RatingIdsInput
+    ): Promise<Rating[]> {
+        return this.repository.delete(ids).then((res) => res.raw);
     }
 }
