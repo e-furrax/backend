@@ -9,13 +9,15 @@ import {
 } from 'type-graphql';
 import { ObjectId } from 'mongodb';
 import { Service } from 'typedi';
-import { MongoRepository } from 'typeorm';
+import { MongoRepository, Repository } from 'typeorm';
+import dayjs from 'dayjs';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
 import { MongoService } from '@/services/repositories/mongo-service';
 
-import { UserRole } from '@/entities/postgres/User';
+import { User, UserRole } from '@/entities/postgres/User';
 import { Appointment, AppointmentStatus } from '@/entities/mongo/Appointment';
 import { Transaction, TransactionStatus } from '@/entities/mongo/Transaction';
 import {
@@ -23,18 +25,26 @@ import {
     AppointmentIdsInput,
     TransactionInput,
 } from '@/modules/mongo/appointment/AppointmentInput';
+import { sendAppointmentEmail } from '@/utils/sendEmail';
+import { PostgresService } from '@/services/repositories/postgres-service';
+dayjs.extend(localizedFormat);
 
 @Service()
 @Resolver(() => Appointment)
 export class AppointmentResolver {
     private appointmentRepository: MongoRepository<Appointment>;
     private transactionRepository: MongoRepository<Transaction>;
+    private userRepository: Repository<User>;
 
-    constructor(private readonly mongoService: MongoService) {
+    constructor(
+        private readonly mongoService: MongoService,
+        private readonly postgresService: PostgresService
+    ) {
         this.appointmentRepository =
             this.mongoService.getRepository(Appointment);
         this.transactionRepository =
             this.mongoService.getRepository(Transaction);
+        this.userRepository = this.postgresService.getRepository(User);
     }
     @Query(() => [Appointment])
     @Authorized([UserRole.FURRAX, UserRole.MODERATOR])
@@ -56,15 +66,43 @@ export class AppointmentResolver {
     @UseMiddleware(isAuth)
     async createAppointment(
         @Ctx() { payload }: MyContext,
-        @Arg('appointmentInput') { title, from, to }: AppointmentInput
+        @Arg('appointmentInput')
+        { from, to, date, description, matches, game }: AppointmentInput
     ): Promise<Appointment> {
         const fromUser = from || payload?.userId; // User ID is given by request parameter ex: admin created appointment or by token ex: User created appointment
         if (!fromUser) {
             return Promise.reject(Error('Missing User ID'));
         }
 
-        const appointment = new Appointment(fromUser, to, title);
-        return this.appointmentRepository.save(appointment);
+        const user = await this.userRepository.findOne(fromUser);
+        const furrax = await this.userRepository.findOne(to);
+
+        const appointment = this.appointmentRepository.create({
+            from: fromUser,
+            to,
+            date,
+            description,
+            matches,
+            game,
+        });
+
+        try {
+            const savedAppointment = await this.appointmentRepository.save(
+                appointment
+            );
+            if (user && furrax) {
+                sendAppointmentEmail(
+                    user.email,
+                    furrax.email,
+                    user.username,
+                    furrax.username,
+                    dayjs(savedAppointment._createdAt).format('L LT')
+                );
+            }
+            return savedAppointment;
+        } catch (error) {
+            return Promise.reject(new Error(error));
+        }
     }
 
     @Mutation(() => Appointment)

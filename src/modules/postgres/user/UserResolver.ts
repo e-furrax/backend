@@ -24,7 +24,7 @@ import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
 import { GamesInput } from '@/modules/postgres/game/GamesInput';
 import { UserInput } from './UserInput';
 import { PromotionInput } from './PromotionInput';
-import { sendEmail } from '@/utils/sendEmail';
+import { sendConfirmationEmail } from '@/utils/sendEmail';
 import { createConfirmationCode } from '@/utils/createConfirmationCode';
 import { redis } from '@/redis';
 import { FilterInput } from './FilterInput';
@@ -131,7 +131,11 @@ export class UserResolver {
         });
 
         await this.repository.save(user);
-        await sendEmail(email, await createConfirmationCode(user.id));
+
+        await sendConfirmationEmail(
+            email,
+            await createConfirmationCode(user.id)
+        );
         return user;
     }
 
@@ -205,8 +209,10 @@ export class UserResolver {
             return false;
         }
 
-        await sendEmail(email, await createConfirmationCode(user.id));
-
+        await sendConfirmationEmail(
+            email,
+            await createConfirmationCode(user.id)
+        );
         return true;
     }
 
