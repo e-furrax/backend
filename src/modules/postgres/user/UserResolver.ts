@@ -22,7 +22,6 @@ import { Game } from '@/entities/postgres/Game';
 import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
 import { GamesInput } from '@/modules/postgres/game/GamesInput';
 import { UserInput } from './UserInput';
-import { PromotionInput } from './PromotionInput';
 import { sendConfirmationEmail } from '@/utils/sendEmail';
 import { createConfirmationCode } from '@/utils/createConfirmationCode';
 import { redis } from '@/redis';
