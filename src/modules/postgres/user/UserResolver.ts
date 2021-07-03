@@ -8,7 +8,6 @@ import {
     Ctx,
     ObjectType,
     Field,
-    Authorized,
 } from 'type-graphql';
 import { Repository, In } from 'typeorm';
 import { Service } from 'typedi';
@@ -17,7 +16,7 @@ import { sign } from 'jsonwebtoken';
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { User, Status, UserRole } from '@/entities/postgres/User';
+import { User, Status } from '@/entities/postgres/User';
 import { Language } from '@/entities/postgres/Language';
 import { Game } from '@/entities/postgres/Game';
 import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
@@ -302,34 +301,6 @@ export class UserResolver {
         user.games = filteredGames;
 
         return await this.repository.save(user);
-    }
-
-    @Mutation(() => User)
-    @UseMiddleware(isAuth)
-    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
-    async updateRole(
-        @Ctx() { payload: currentUser }: MyContext,
-        @Arg('promotion') { id, role }: PromotionInput
-    ): Promise<User> {
-        const user = (await this.repository.findOne({ id })) as User;
-        if (
-            currentUser?.role === UserRole.MODERATOR &&
-            (user.role === UserRole.MODERATOR || user.role === UserRole.ADMIN)
-        ) {
-            throw new Error(
-                'Access denied! Action not permitted for this user'
-            );
-        }
-        if (
-            currentUser?.role === UserRole.MODERATOR &&
-            (role === UserRole.MODERATOR || role === UserRole.ADMIN)
-        ) {
-            throw new Error(
-                "Access denied! You don't have permission for this action!"
-            );
-        }
-        user.role = role;
-        return this.repository.save(user);
     }
 
     @Query(() => [Statistic])

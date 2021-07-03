@@ -14,3 +14,9 @@ export class RatingInput implements Partial<Rating> {
     @Field(() => UserInput)
     toUser: User;
 }
+
+@InputType()
+export class RatingIdsInput {
+    @Field(() => [Number])
+    ids: number[];
+}

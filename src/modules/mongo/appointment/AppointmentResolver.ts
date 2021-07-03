@@ -47,7 +47,7 @@ export class AppointmentResolver {
         this.userRepository = this.postgresService.getRepository(User);
     }
     @Query(() => [Appointment])
-    @Authorized([UserRole.FURRAX, UserRole.MODERATOR])
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async getAppointments(): Promise<Appointment[]> {
         return this.appointmentRepository.find();
     }
@@ -137,6 +137,7 @@ export class AppointmentResolver {
     }
 
     @Mutation(() => Boolean)
+    @Authorized([UserRole.ADMIN, UserRole.FURRAX, UserRole.MODERATOR])
     async deleteAppointment(
         @Arg('payload') { ids }: AppointmentIdsInput
     ): Promise<boolean> {
