@@ -71,11 +71,11 @@ export class ProfileResolver {
         @Arg('initialPassword') initialPassword: string,
         @Arg('newPassword') newPassword: string
     ): Promise<boolean> {
-        const hashedNewPassword = await bcrypt.hash(newPassword, 12);
         const user = await this.repository.findOne(payload?.userId);
         if (!user) {
             throw new Error('Could not find user');
         }
+        const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
         const verify = await bcrypt.compare(initialPassword, user.password);
 

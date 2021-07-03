@@ -22,14 +22,21 @@ import { Game } from '@/entities/postgres/Game';
 import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
 import { GamesInput } from '@/modules/postgres/game/GamesInput';
 import { UserInput } from './UserInput';
-import { PromotionInput } from './PromotionInput';
-import { sendConfirmationEmail } from '@/utils/sendEmail';
+import {
+    sendConfirmationEmail,
+    sendResetPasswordEmail,
+} from '@/utils/sendEmail';
 import { createConfirmationCode } from '@/utils/createConfirmationCode';
 import { redis } from '@/redis';
 import { FilterInput } from './FilterInput';
 import { RegisterInput } from './register/RegisterInput';
 import { Availability } from '@/entities/postgres/Availability';
 import { Statistic } from '@/entities/postgres/Statistic';
+import { createResetPasswordUrl } from '@/utils/createResetPasswordUrl';
+import {
+    confirmationPrefix,
+    resetPasswordPrefix,
+} from '@/constants/redisPrefixes';
 
 @ObjectType()
 class LoginResponse {
@@ -171,7 +178,7 @@ export class UserResolver {
 
     @Mutation(() => LoginResponse)
     async confirmUser(@Arg('code') code: string): Promise<LoginResponse> {
-        const userId = await redis.get(code);
+        const userId = await redis.get(confirmationPrefix + code);
 
         if (!userId) {
             throw new Error("This code isn't valid");
@@ -191,6 +198,48 @@ export class UserResolver {
                 expiresIn: '1y',
             }),
         };
+    }
+
+    @Mutation(() => Boolean)
+    async resetPassword(@Arg('email') email: string): Promise<boolean> {
+        const user = await this.repository.findOne({ where: { email } });
+
+        if (!user) {
+            return true;
+        }
+
+        await sendResetPasswordEmail(
+            email,
+            await createResetPasswordUrl(user.id)
+        );
+
+        return true;
+    }
+
+    @Mutation(() => User, { nullable: true })
+    async changePassword(
+        @Arg('token') token: string,
+        @Arg('newPassword') newPassword: string
+    ): Promise<User> {
+        const userId = await redis.get(resetPasswordPrefix + token);
+        if (!userId) {
+            throw new Error(
+                "Looks like your token has expired or doesn't exist"
+            );
+        }
+
+        const user = await this.repository.findOne(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+        user.password = hashedNewPassword;
+
+        await this.repository.save(user);
+
+        return user;
     }
 
     @Mutation(() => Boolean)
