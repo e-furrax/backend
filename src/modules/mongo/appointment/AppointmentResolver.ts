@@ -180,14 +180,14 @@ export class AppointmentResolver {
                 })
             );
 
-            const involvedUsers = await Promise.all(promises);
+            const mappedAppointments = await Promise.all(promises);
 
-            involvedUsers.forEach((users) => {
-                if (users.from && users.to) {
+            mappedAppointments.forEach((appointment) => {
+                if (appointment.from && appointment.to) {
                     sendCancelAppointmentEmail(
-                        users.from,
-                        users.to,
-                        dayjs(users.date).format('L LT')
+                        appointment.from,
+                        appointment.to,
+                        dayjs(appointment.date).format('L LT')
                     );
                 }
             });
