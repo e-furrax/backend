@@ -1,42 +1,83 @@
 entity: User
 items:
     user0:
-        username: bob
-        email: bob@gmail.com
+        username: Pierre
+        email: pierre@gmail.com
         description: '{{lorem.paragraph}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
-        gender: 'male'
-        status: 2
-        role: 'user'
+        gender: 'Male'
+        status: 1
+        role: 'USER'
+        languages:
+            - '@language0'
+        games:
+            - '@game1'
     user1:
-        username: xavier
-        email: xavier@gmail.com
+        username: Basile
+        email: basile@gmail.com
         description: '{{lorem.paragraph}}'
+        createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
-        gender: 'male'
-        status: 2
-        role: 'user'
+        gender: 'Male'
+        status: 1
+        role: 'USER'
+        languages:
+            - '@language0'
+        games:
+            - '@game2'
     user2:
-        username: paul
-        email: paul@gmail.com
+        username: Thomas
+        email: thomas@gmail.com
         description: '{{lorem.paragraph}}'
+        createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
-        gender: 'male'
-        status: 2
-        role: 'furrax'
+        gender: 'Male'
+        status: 1
+        role: 'USER'
+        languages:
+            - '@language0'
+        games:
+            - '@game1'
+            - '@game2'
     user3:
-        username: jacques
-        email: jacques@gmail.com
+        username: Tom
+        email: tom@gmail.com
         description: '{{lorem.paragraph}}'
-        password: '$2y$12$nXnajHcdoPYUrKqHzF6SYesfeIuGeAf6MSmY70MkPeZoJQZQYIotq'
-        gender: 'male'
-        status: 2
-        role: 'admin'
-    user4:
-        username: louis
-        email: louis@gmail.com
+        createdAt: '{{date.recent}}'
+        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'Male'
+        status: 1
+        role: 'USER'
+        languages:
+            - '@language0'
+            - '@language1'
+            - '@language2'
+        games:
+            - '@game0'
+            - '@game3'
+    user{4..6}:
+        username: '{{internet.userName}}'
+        email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
-        password: '$2y$12$nXnajHcdoPYUrKqHzF6SYesfeIuGeAf6MSmY70MkPeZoJQZQYIotq'
-        gender: 'male'
-        status: 2
-        role: 'moderator'
+        createdAt: '{{date.recent}}'
+        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'Female'
+        status: 1
+        role: 'USER'
+        languages:
+            - '@language*'
+        games:
+            - '@game*'
+    user{7..10}:
+        username: '{{internet.userName}}'
+        email: '{{internet.exampleEmail}}'
+        description: '{{lorem.paragraph}}'
+        createdAt: '{{date.recent}}'
+        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        gender: 'Male'
+        status: 1
+        role: 'USER'
+        languages:
+            - '@language*'
+        games:
+            - '@game*'
