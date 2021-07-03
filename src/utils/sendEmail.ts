@@ -1,3 +1,4 @@
+import { User } from '@/entities/postgres/User';
 import {
     createTestAccount,
     createTransport,
@@ -63,13 +64,36 @@ export const sendAppointmentEmail = async (
         from: '"Efurrax Bot 🤖" <contact.efurrax@gmail.com>',
         to: userEmail,
         subject: 'You have a new apppointment',
-        html: `You made an appointment with ${furraxUsername} on ${date}, you will receive a notification when your appointment is confirmed`,
+        text: `You made an appointment with ${furraxUsername} on ${date}, you will receive a notification when your appointment is confirmed.`,
+        html: `You made an appointment with ${furraxUsername} on ${date}, you will receive a notification when your appointment is confirmed.`,
     });
     const second = sendEmail({
         from: '"Efurrax Bot 🤖" <contact.efurrax@gmail.com>',
         to: furraxEmail,
         subject: 'You have a new demand of appointment',
-        html: `${userUsername} wants to play with you on ${date}`,
+        text: `${userUsername} wants to play with you on ${date}.`,
+        html: `${userUsername} wants to play with you on ${date}.`,
+    });
+    return Promise.all([first, second]);
+};
+export const sendCancelAppointmentEmail = async (
+    user: Partial<User>,
+    furrax: Partial<User>,
+    date: string
+) => {
+    const first = sendEmail({
+        from: '"Efurrax Bot 🤖" <contact.efurrax@gmail.com>',
+        to: user.email,
+        subject: 'Appointment canceled',
+        text: `Your appointment with ${furrax.username} on ${date} has been canceled.`,
+        html: `Your appointment with ${furrax.username} on ${date} has been canceled.`,
+    });
+    const second = sendEmail({
+        from: '"Efurrax Bot 🤖" <contact.efurrax@gmail.com>',
+        to: furrax.email,
+        subject: 'Appointment canceled',
+        text: `Your appointment with ${user.username} on ${date} has been canceled.`,
+        html: `Your appointment with ${user.username} on ${date} has been canceled.`,
     });
     return Promise.all([first, second]);
 };

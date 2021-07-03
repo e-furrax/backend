@@ -25,7 +25,10 @@ import {
     AppointmentIdsInput,
     TransactionInput,
 } from '@/modules/mongo/appointment/AppointmentInput';
-import { sendAppointmentEmail } from '@/utils/sendEmail';
+import {
+    sendAppointmentEmail,
+    sendCancelAppointmentEmail,
+} from '@/utils/sendEmail';
 import { PostgresService } from '@/services/repositories/postgres-service';
 dayjs.extend(localizedFormat);
 
@@ -161,6 +164,34 @@ export class AppointmentResolver {
                     upsert: false,
                 } as any
             );
+
+            const deletedAppointments =
+                await this.appointmentRepository.findByIds(appointmentIds);
+
+            const promises = deletedAppointments.map(
+                async ({ from, to, date }) => ({
+                    from: await this.userRepository.findOne(from, {
+                        select: ['email', 'username'],
+                    }),
+                    to: await this.userRepository.findOne(to, {
+                        select: ['email', 'username'],
+                    }),
+                    date,
+                })
+            );
+
+            const involvedUsers = await Promise.all(promises);
+
+            involvedUsers.forEach((users) => {
+                if (users.from && users.to) {
+                    sendCancelAppointmentEmail(
+                        users.from,
+                        users.to,
+                        dayjs(users.date).format('L LT')
+                    );
+                }
+            });
+
             // Return could be more explicit
             return !!result.ok;
         } catch (e) {
