@@ -7,9 +7,8 @@ import {
     Query,
     Authorized,
 } from 'type-graphql';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Service } from 'typedi';
-
 import { isAuth } from '@/middlewares/isAuth';
 import { MyContext } from '@/types/MyContext';
 import { PostgresService } from '@/services/repositories/postgres-service';
@@ -64,12 +63,12 @@ export class RatingResolver {
         });
     }
 
-    @Mutation(() => Rating)
+    @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
     @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async removeRating(
         @Arg('ratings') { ids }: RatingIdsInput
-    ): Promise<Rating[]> {
-        return this.repository.delete(ids).then((res) => res.raw);
+    ): Promise<boolean> {
+        return this.repository.delete(ids).then(({ affected }) => !!affected);
     }
 }

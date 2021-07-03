@@ -36,7 +36,17 @@ export class PromotionDemandResolver {
     @Query(() => [PromotionDemand])
     @UseMiddleware(isAuth)
     @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
-    async getDemands(
+    async getDemands(): Promise<PromotionDemand[]> {
+        return this.promotionRepository
+            .createQueryBuilder('promotionDemand')
+            .leftJoinAndSelect('promotionDemand.user', 'user')
+            .getMany();
+    }
+
+    @Query(() => [PromotionDemand])
+    @UseMiddleware(isAuth)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
+    async getDemand(
         @Arg('userInput') { id }: UserInput
     ): Promise<PromotionDemand> {
         return this.promotionRepository
@@ -44,16 +54,6 @@ export class PromotionDemandResolver {
             .leftJoinAndSelect('promotionDemand.user', 'user')
             .where('user.id = :id', { id })
             .getOneOrFail();
-    }
-
-    @Query(() => [PromotionDemand])
-    @UseMiddleware(isAuth)
-    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
-    async getDemand(): Promise<PromotionDemand[]> {
-        return this.promotionRepository
-            .createQueryBuilder('promotionDemand')
-            .leftJoinAndSelect('promotionDemand.user', 'user')
-            .getMany();
     }
 
     @Mutation(() => PromotionDemand)
