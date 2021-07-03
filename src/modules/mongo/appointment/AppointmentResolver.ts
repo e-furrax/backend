@@ -182,12 +182,12 @@ export class AppointmentResolver {
 
             const mappedAppointments = await Promise.all(promises);
 
-            mappedAppointments.forEach((appointment) => {
-                if (appointment.from && appointment.to) {
+            mappedAppointments.forEach(({ from, to, date }) => {
+                if (from && to && date) {
                     sendCancelAppointmentEmail(
-                        appointment.from,
-                        appointment.to,
-                        dayjs(appointment.date).format('L LT')
+                        from,
+                        to,
+                        dayjs(date).format('L LT')
                     );
                 }
             });
