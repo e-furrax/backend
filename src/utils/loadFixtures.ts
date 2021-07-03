@@ -67,9 +67,7 @@ export const loadFixtures = async (connection: Connection) => {
         }
     }
 
-    await Promise.all(fx).then(() =>
-        console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.')
-    );
+    await Promise.all(fx);
 
     const userRepository = connection.getRepository('User') as Repository<User>;
     const users = (await userRepository.find()) as User[];
@@ -84,4 +82,6 @@ export const loadFixtures = async (connection: Connection) => {
             users.length
         );
     }
+
+    console.log('\x1b[32m%s\x1b[0m', 'Fixtures are successfully loaded.');
 };
