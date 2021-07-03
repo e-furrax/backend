@@ -42,6 +42,16 @@ export const sendConfirmationEmail = async (email: string, code: string) => {
     });
 };
 
+export const sendResetPasswordEmail = async (email: string, url: string) => {
+    await sendEmail({
+        from: '"Efurrax Bot 🤖" <contact.efurrax@gmail.com>',
+        to: email,
+        subject: 'Your reset password url',
+        text: `Change your password at ${url}`,
+        html: `Change your password at <a href="${url}">${url}</a>`,
+    });
+};
+
 export const sendAppointmentEmail = async (
     userEmail: string,
     furraxEmail: string,
