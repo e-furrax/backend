@@ -2,24 +2,29 @@ entity: User
 items:
     user0:
         username: Pierre
-        email: bob@gmail.com
+        email: pierre@gmail.com
         description: '{{lorem.paragraph}}'
-        createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
         gender: 'Male'
-        availability: '@availability0'
         status: 1
         role: 'USER'
+        languages:
+            - '@language0'
+        games:
+            - '@game1'
     user1:
         username: Basile
-        email: xavier@gmail.com
+        email: basile@gmail.com
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
         gender: 'Male'
-        availability: '@availability1'
         status: 1
         role: 'USER'
+        languages:
+            - '@language0'
+        games:
+            - '@game2'
     user2:
         username: Thomas
         email: thomas@gmail.com
@@ -27,9 +32,13 @@ items:
         createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
         gender: 'Male'
-        availability: '@availability2'
         status: 1
         role: 'USER'
+        languages:
+            - '@language0'
+        games:
+            - '@game1'
+            - '@game2'
     user3:
         username: Tom
         email: tom@gmail.com
@@ -39,7 +48,6 @@ items:
         gender: 'Male'
         status: 1
         role: 'USER'
-        availability: '@availability3'
         languages:
             - '@language0'
             - '@language1'
@@ -54,9 +62,12 @@ items:
         createdAt: '{{date.recent}}'
         password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
         gender: 'Female'
-        availability: '@availability($current)'
         status: 1
         role: 'USER'
+        languages:
+            - '@language*'
+        games:
+            - '@game*'
     user{7..10}:
         username: '{{internet.userName}}'
         email: '{{internet.exampleEmail}}'
@@ -66,4 +77,7 @@ items:
         gender: 'Male'
         status: 1
         role: 'USER'
-        availability: '@availability($current)'
+        languages:
+            - '@language*'
+        games:
+            - '@game*'
