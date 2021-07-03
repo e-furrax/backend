@@ -48,7 +48,7 @@ export const sendResetPasswordEmail = async (email: string, url: string) => {
         to: email,
         subject: 'Your reset password url',
         text: `Change your password at ${url}`,
-        html: `Change your password at ${url}`,
+        html: `Change your password at <a href="${url}">${url}</a>`,
     });
 };
 

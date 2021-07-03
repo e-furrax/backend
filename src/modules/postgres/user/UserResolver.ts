@@ -216,11 +216,11 @@ export class UserResolver {
         return true;
     }
 
-    @Mutation(() => User, { nullable: true })
+    @Mutation(() => Boolean)
     async changePassword(
         @Arg('token') token: string,
         @Arg('newPassword') newPassword: string
-    ): Promise<User> {
+    ): Promise<boolean> {
         const userId = await redis.get(resetPasswordPrefix + token);
         if (!userId) {
             throw new Error(
@@ -241,7 +241,7 @@ export class UserResolver {
 
         await this.repository.save(user);
 
-        return user;
+        return true;
     }
 
     @Mutation(() => Boolean)
