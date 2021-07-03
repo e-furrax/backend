@@ -4,10 +4,10 @@ items:
         username: Pierre
         email: pierre@gmail.com
         description: '{{lorem.paragraph}}'
-        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
-        role: 'USER'
+        role: 'ADMIN'
         languages:
             - '@language0'
         games:
@@ -17,10 +17,10 @@ items:
         email: basile@gmail.com
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.recent}}'
-        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
-        role: 'USER'
+        role: 'MODERATOR'
         languages:
             - '@language0'
         games:
@@ -30,10 +30,10 @@ items:
         email: thomas@gmail.com
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.recent}}'
-        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
-        role: 'USER'
+        role: 'FURRAX'
         languages:
             - '@language0'
         games:
@@ -44,7 +44,7 @@ items:
         email: tom@gmail.com
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.recent}}'
-        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
         role: 'USER'
@@ -60,7 +60,7 @@ items:
         email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.recent}}'
-        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Female'
         status: 1
         role: 'USER'
@@ -73,7 +73,7 @@ items:
         email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.recent}}'
-        password: '$2y$12$Xw8xtJjefvTwJgvGoo1FU.Gd9ZA3LXyiefVH2h4JWjew32jQaeymW'
+        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
         role: 'USER'

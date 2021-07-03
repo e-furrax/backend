@@ -29,10 +29,10 @@ registerEnumType(Status, {
 });
 
 export enum UserRole {
-    USER = 'user',
-    FURRAX = 'furrax',
-    MODERATOR = 'moderator',
-    ADMIN = 'admin',
+    USER = 'USER',
+    FURRAX = 'FURRAX',
+    MODERATOR = 'MODERATOR',
+    ADMIN = 'ADMIN',
 }
 
 registerEnumType(UserRole, {
