@@ -233,6 +233,8 @@ export class UserResolver {
             throw new Error('User not found');
         }
 
+        await redis.del(resetPasswordPrefix + token);
+
         const hashedNewPassword = await bcrypt.hash(newPassword, 12);
 
         user.password = hashedNewPassword;
