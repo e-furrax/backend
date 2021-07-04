@@ -9,6 +9,7 @@ import {
     PrimaryGeneratedColumn,
     JoinTable,
     ManyToMany,
+    CreateDateColumn,
 } from 'typeorm';
 import { Rating } from './Rating';
 import { Language } from './Language';
@@ -113,4 +114,11 @@ export class User extends BaseEntity {
     @Field(() => [Statistic], { defaultValue: [] })
     @OneToMany(() => Statistic, (statistic) => statistic.user)
     statistics: Statistic[];
+
+    @Field()
+    @CreateDateColumn({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP(6)',
+    })
+    createdAt: Date;
 }

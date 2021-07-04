@@ -353,6 +353,28 @@ export class UserResolver {
         return await this.repository.save(user);
     }
 
+    @Mutation(() => User)
+    @UseMiddleware(isAuth)
+    async removeUserLanguage(
+        @Ctx() { payload }: MyContext,
+        @Arg('id') languageId: number
+    ): Promise<User> {
+        const user = await this.repository.findOne(payload?.userId, {
+            relations: ['languages'],
+        });
+
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+        const filteredLanguages = user.languages.filter(
+            (language) => language.id !== languageId
+        );
+
+        user.languages = filteredLanguages;
+
+        return await this.repository.save(user);
+    }
+
     @Query(() => [Statistic])
     @UseMiddleware(isAuth)
     async getStatistics(@Ctx() { payload }: MyContext): Promise<Statistic[]> {

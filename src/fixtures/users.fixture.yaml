@@ -16,7 +16,7 @@ items:
         username: Basile
         email: basile@gmail.com
         description: '{{lorem.paragraph}}'
-        createdAt: '{{date.recent}}'
+        createdAt: '{{date.past}}'
         password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
@@ -29,7 +29,7 @@ items:
         username: Thomas
         email: thomas@gmail.com
         description: '{{lorem.paragraph}}'
-        createdAt: '{{date.recent}}'
+        createdAt: '{{date.past}}'
         password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
@@ -43,7 +43,7 @@ items:
         username: Tom
         email: tom@gmail.com
         description: '{{lorem.paragraph}}'
-        createdAt: '{{date.recent}}'
+        createdAt: '{{date.past}}'
         password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
@@ -59,7 +59,7 @@ items:
         username: '{{internet.userName}}'
         email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
-        createdAt: '{{date.recent}}'
+        createdAt: '{{date.past}}'
         password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Female'
         status: 1
@@ -72,7 +72,7 @@ items:
         username: '{{internet.userName}}'
         email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
-        createdAt: '{{date.recent}}'
+        createdAt: '{{date.past}}'
         password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
         gender: 'Male'
         status: 1
