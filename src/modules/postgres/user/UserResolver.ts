@@ -37,11 +37,6 @@ import {
     confirmationPrefix,
     resetPasswordPrefix,
 } from '@/constants/redisPrefixes';
-import {
-    getCSGOPlayerStats,
-    getRiotPlayerId,
-    getRiotPlayerStats,
-} from '@/services/API/gameApi';
 
 @ObjectType()
 class LoginResponse {
@@ -358,31 +353,6 @@ export class UserResolver {
         return await this.repository.save(user);
     }
 
-    @Mutation(() => Boolean)
-    @UseMiddleware(isAuth)
-    async addGamesLol(
-        @Ctx() { payload }: MyContext,
-        @Arg('userName') userName: string
-    ): Promise<boolean> {
-        const user = await this.repository.findOne({
-            where: {
-                id: payload?.userId,
-            },
-            relations: ['games']
-        });
-
-        if (!user) {
-            throw new Error('Could not find user');
-        }
-
-        const id = await getRiotPlayerId(encodeURIComponent(userName));
-        const playerInfo = await getRiotPlayerStats(id);
-        console.log(playerInfo); // garder pour le lint
-        //todo add to player
-        await this.repository.save(user);
-        return true;
-    }
-
     @Query(() => [Statistic])
     @UseMiddleware(isAuth)
     async getStatistics(@Ctx() { payload }: MyContext): Promise<Statistic[]> {
@@ -395,31 +365,5 @@ export class UserResolver {
         }
 
         return user.statistics;
-    }
-
-    @Mutation(() => Boolean)
-    @UseMiddleware(isAuth)
-    async addGamesCS(
-        @Ctx() { payload }: MyContext,
-        @Arg('userName') userName: string
-    ): Promise<boolean> {
-        const user = await this.repository.findOne({
-            where: {
-                id: payload?.userId,
-            },
-            relations: ['games'],
-        });
-
-        if (!user) {
-            throw new Error('Could not find user');
-        }
-
-        const playerInfo = await getCSGOPlayerStats(
-            encodeURIComponent(userName)
-        );
-        console.log(playerInfo.data.segments); // garder pour le lint
-        //todo add to player
-        await this.repository.save(user);
-        return true;
     }
 }
