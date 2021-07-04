@@ -3,6 +3,7 @@
         "apollo-server": "^2.21.0",
         "apollo-server-express": "^2.21.0",
         "aws-sdk": "^2.918.0",
+        "axios": "^0.21.1",
         "bcryptjs": "^2.4.3",
         "class-validator": "^0.13.1",
         "connect-redis": "^5.1.0",

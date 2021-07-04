@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 const csGoApiKey = '9c2da57a-f1cf-4e0b-be3d-6e6971b1c92a';
-const riotApiKey = 'RGAPI-809a775c-ba16-4b69-bf86-7a6d21bd5371';
+const riotApiKey = 'RGAPI-a5c0af82-135c-4aca-9e3d-4ca1ae1056d3';
 
 function errorCheck(error: any) {
     switch (error.response.status) {
@@ -42,21 +42,16 @@ export async function getCSGOPlayerStats(identifier: string) {
         .catch((err) => {
             return errorCheck(err);
         });
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+
     const {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         data: {
-            data: { platformInfo, segments },
+            data: { segments },
         },
     } = response;
     return {
         data: {
-            pInfo: {
-                platform: platformInfo.platformSlug,
-                platformUserID: platformInfo.platformUserId,
-                platformUserHandle: platformInfo.platformUserHandle,
-                avatarURL: platformInfo.avatarUrl,
-            },
             segments,
         },
     };
@@ -64,14 +59,16 @@ export async function getCSGOPlayerStats(identifier: string) {
 }
 
 /**
- * @param {string} identifier The Summoner Name of the user you are looking up id for
+ * @param {string} name The Summoner Name of the user you are looking up id for
  */
 export async function getRiotPlayerId(name: string) {
     const summonersInfo: AxiosResponse<any> | void = await axios
         .get(
             `https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${name}`,
             {
-                headers: { 'X-Riot-Token': riotApiKey },
+                headers: {
+                    'X-Riot-Token': riotApiKey,
+                },
             }
         )
         .catch((err) => {
@@ -79,16 +76,14 @@ export async function getRiotPlayerId(name: string) {
         });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return summonersInfo.id;
+    return summonersInfo.data.id;
 }
 
 /**
- * @param {string} identifier The RiotId of the user you are looking up stats for, got by • getRiotPlayerId()
+ * @param {string} id The RiotId of the user you are looking up stats for, got by • getRiotPlayerId()
  */
 export async function getRiotPlayerStats(id: string) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return await axios
+    const summonersInfo: AxiosResponse<any> | void = await axios
         .get(
             `https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${id}`,
             {
@@ -98,5 +93,7 @@ export async function getRiotPlayerStats(id: string) {
         .catch((err) => {
             return errorCheck(err);
         });
-    // ajustement a faire pour traiter le json ici quand les url seront en place(optimisation avec l'ajout en db
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return summonersInfo.data;
 }
