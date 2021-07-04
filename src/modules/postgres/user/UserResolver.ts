@@ -346,7 +346,6 @@ export class UserResolver {
         if (!user) {
             throw new Error('Could not find user');
         }
-
         const filteredGames = user.games.filter((game) => game.id !== gameId);
 
         user.games = filteredGames;

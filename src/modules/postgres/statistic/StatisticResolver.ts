@@ -2,6 +2,7 @@ import {
     Resolver,
     Mutation,
     Arg,
+    Query,
     UseMiddleware,
     Ctx,
     Authorized,
@@ -15,6 +16,8 @@ import { PostgresService } from '@/services/repositories/postgres-service';
 import { UserRole } from '@/entities/postgres/User';
 import { Statistic } from '@/entities/postgres/Statistic';
 import { StatisticInput } from './StatisticInput';
+import { LolObjectType } from './LolObjectType';
+import { getRiotPlayerId, getRiotPlayerStats } from '@/services/API/gameApi';
 
 @Resolver(() => Statistic)
 @Service()
@@ -23,6 +26,14 @@ export class StatisticResolver {
 
     constructor(private readonly postgresService: PostgresService) {
         this.repository = this.postgresService.getRepository(Statistic);
+    }
+
+    @Query(() => [LolObjectType])
+    @UseMiddleware(isAuth)
+    async getLolStats(@Arg('username') username: string): Promise<any> {
+        const id = await getRiotPlayerId(encodeURIComponent(username));
+        const playerInfo = await getRiotPlayerStats(id);
+        return playerInfo;
     }
 
     @Mutation(() => Statistic)
@@ -39,6 +50,26 @@ export class StatisticResolver {
                 rank,
                 playerId,
             });
+        }
+
+        if (playerId) {
+            const statFound = await this.repository.findOne({
+                where: {
+                    playerId,
+                    game,
+                    mode,
+                },
+            });
+
+            if (statFound) {
+                return await this.repository.save({
+                    id: statFound.id,
+                    mode,
+                    game,
+                    rank,
+                    playerId,
+                });
+            }
         }
 
         const newStatistic = await this.repository.create({
