@@ -29,6 +29,7 @@ registerEnumType(Status, {
 });
 
 export enum UserRole {
+    BANNED = 'BANNED',
     USER = 'USER',
     FURRAX = 'FURRAX',
     MODERATOR = 'MODERATOR',

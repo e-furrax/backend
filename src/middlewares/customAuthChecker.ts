@@ -1,6 +1,7 @@
 import { AuthChecker } from 'type-graphql';
 import { MyContextPayload } from '@/types/MyContext';
 import { verify } from 'jsonwebtoken';
+import { UserRole } from '@/entities/postgres/User';
 
 export const customAuthChecker: AuthChecker<any> = ({ context }, roles) => {
     const authorization =
@@ -20,5 +21,8 @@ export const customAuthChecker: AuthChecker<any> = ({ context }, roles) => {
         return false;
     }
 
-    return !roles.length || roles.includes(userRole);
+    return (
+        !(userRole === UserRole.BANNED) &&
+        (!roles.length || roles.includes(userRole))
+    );
 };
