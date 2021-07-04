@@ -97,3 +97,25 @@ export const sendCancelAppointmentEmail = async (
     });
     return Promise.all([first, second]);
 };
+
+export const sendConfirmAppointmentEmail = async (
+    user: Partial<User>,
+    furrax: Partial<User>,
+    date: string
+) => {
+    const first = sendEmail({
+        from: '"Efurrax Bot 🤖" <contact.efurrax@gmail.com>',
+        to: user.email,
+        subject: 'Appointment confirmed',
+        text: `Your appointment with ${furrax.username} on ${date} has been confirmed!`,
+        html: `Your appointment with ${furrax.username} on ${date} has been confirmed!`,
+    });
+    const second = sendEmail({
+        from: '"Efurrax Bot 🤖" <contact.efurrax@gmail.com>',
+        to: furrax.email,
+        subject: 'Appointment confirmed',
+        text: `Your appointment with ${user.username} on ${date} has been confirmed!`,
+        html: `Your appointment with ${user.username} on ${date} has been confirmed!`,
+    });
+    return Promise.all([first, second]);
+};

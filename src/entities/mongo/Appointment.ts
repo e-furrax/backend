@@ -8,12 +8,12 @@ import {
     UpdateDateColumn,
     BaseEntity,
 } from 'typeorm';
-import { Transaction } from './Transaction';
+// import { Transaction } from './Transaction';
 
 export enum AppointmentStatus {
     CANCELLED = 'CANCELLED',
     PENDING = 'PENDING',
-    DONE = 'DONE',
+    CONFIRMED = 'CONFIRMED',
 }
 
 registerEnumType(AppointmentStatus, {
@@ -63,8 +63,4 @@ export class Appointment extends BaseEntity {
     @Field(() => AppointmentStatus)
     @Column('string', { default: AppointmentStatus.PENDING })
     status: AppointmentStatus = AppointmentStatus.PENDING;
-
-    @Field(() => [Transaction])
-    @Column(() => Transaction)
-    transactions: Transaction[] = [];
 }

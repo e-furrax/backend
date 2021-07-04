@@ -2,7 +2,7 @@ import { Length } from 'class-validator';
 import { Field, InputType } from 'type-graphql';
 
 import { isExistingUser } from '@/services/annotations/isExistingUser';
-import { Appointment } from '@/entities/mongo/Appointment';
+import { Appointment, AppointmentStatus } from '@/entities/mongo/Appointment';
 import { Transaction } from '@/entities/mongo/Transaction';
 
 @InputType()
@@ -41,4 +41,13 @@ export class TransactionInput implements Partial<Transaction> {
 
     @Length(5, 128)
     description: string;
+}
+
+@InputType()
+export class AppointmentStatusInput {
+    @Field()
+    from: number;
+
+    @Field(() => [String], { nullable: true })
+    status?: AppointmentStatus[];
 }

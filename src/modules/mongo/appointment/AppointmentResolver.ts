@@ -19,15 +19,17 @@ import { MongoService } from '@/services/repositories/mongo-service';
 
 import { User, UserRole } from '@/entities/postgres/User';
 import { Appointment, AppointmentStatus } from '@/entities/mongo/Appointment';
-import { Transaction, TransactionStatus } from '@/entities/mongo/Transaction';
+import { Transaction } from '@/entities/mongo/Transaction';
 import {
     AppointmentInput,
     AppointmentIdsInput,
     TransactionInput,
+    AppointmentStatusInput,
 } from '@/modules/mongo/appointment/AppointmentInput';
 import {
     sendAppointmentEmail,
     sendCancelAppointmentEmail,
+    sendConfirmAppointmentEmail,
 } from '@/utils/sendEmail';
 import { PostgresService } from '@/services/repositories/postgres-service';
 dayjs.extend(localizedFormat);
@@ -45,10 +47,9 @@ export class AppointmentResolver {
     ) {
         this.appointmentRepository =
             this.mongoService.getRepository(Appointment);
-        this.transactionRepository =
-            this.mongoService.getRepository(Transaction);
         this.userRepository = this.postgresService.getRepository(User);
     }
+
     @Query(() => [Appointment])
     @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async getAppointments(): Promise<Appointment[]> {
@@ -57,12 +58,28 @@ export class AppointmentResolver {
 
     @Query(() => [Appointment], { nullable: true })
     async getAppointmentsByUser(
-        @Arg('from') from: number
+        @Arg('data') { from, status }: AppointmentStatusInput
     ): Promise<Appointment[]> {
         if (!from) {
             return Promise.reject(new Error('Missing User ID'));
         }
-        return this.appointmentRepository.find({ from });
+
+        if (!status) {
+            return this.appointmentRepository.find({
+                where: {
+                    from,
+                },
+            });
+        }
+
+        const builtOrOperationForStatus = status.map((s) => ({ status: s }));
+
+        return this.appointmentRepository.find({
+            where: {
+                from,
+                $or: builtOrOperationForStatus,
+            },
+        });
     }
 
     @Mutation(() => Appointment)
@@ -87,6 +104,7 @@ export class AppointmentResolver {
             description,
             matches,
             game,
+            status: AppointmentStatus.PENDING,
         });
 
         try {
@@ -140,7 +158,12 @@ export class AppointmentResolver {
     }
 
     @Mutation(() => Boolean)
-    @Authorized([UserRole.ADMIN, UserRole.FURRAX, UserRole.MODERATOR])
+    @Authorized([
+        UserRole.ADMIN,
+        UserRole.FURRAX,
+        UserRole.MODERATOR,
+        UserRole.USER,
+    ])
     async deleteAppointment(
         @Arg('payload') { ids }: AppointmentIdsInput
     ): Promise<boolean> {
@@ -153,16 +176,8 @@ export class AppointmentResolver {
                 {
                     $set: {
                         status: AppointmentStatus.CANCELLED,
-                        'transactions.$[elem].status':
-                            TransactionStatus.CANCELLED,
                     },
-                },
-                {
-                    arrayFilters: [
-                        { 'elem.status': TransactionStatus.PENDING },
-                    ],
-                    upsert: false,
-                } as any
+                }
             );
 
             const deletedAppointments =
@@ -192,9 +207,66 @@ export class AppointmentResolver {
                 }
             });
 
-            // Return could be more explicit
             return !!result.ok;
         } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
+    @Mutation(() => Boolean)
+    @Authorized([
+        UserRole.ADMIN,
+        UserRole.FURRAX,
+        UserRole.MODERATOR,
+        UserRole.USER,
+    ])
+    async confirmAppointment(
+        @Arg('payload') { ids }: AppointmentIdsInput
+    ): Promise<boolean> {
+        try {
+            const appointmentIds = ids.map((id) => ({
+                _id: ObjectId.createFromHexString(id),
+            }));
+            const { result } = await this.appointmentRepository.updateMany(
+                { $or: [...appointmentIds] },
+                {
+                    $set: {
+                        status: AppointmentStatus.CONFIRMED,
+                    },
+                }
+            );
+
+            const deletedAppointments =
+                await this.appointmentRepository.findByIds(appointmentIds);
+
+            const promises = deletedAppointments.map(
+                async ({ from, to, date }) => ({
+                    from: await this.userRepository.findOne(from, {
+                        select: ['email', 'username'],
+                    }),
+                    to: await this.userRepository.findOne(to, {
+                        select: ['email', 'username'],
+                    }),
+                    date,
+                })
+            );
+
+            const mappedAppointments = await Promise.all(promises);
+
+            mappedAppointments.forEach(({ from, to, date }) => {
+                if (from && to && date) {
+                    sendConfirmAppointmentEmail(
+                        from,
+                        to,
+                        dayjs(date).format('L LT')
+                    );
+                }
+            });
+
+            return !!result.ok;
+        } catch (e) {
+            console.log(e);
             return false;
         }
     }
