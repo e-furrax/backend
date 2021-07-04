@@ -17,11 +17,7 @@ import { UserRole } from '@/entities/postgres/User';
 import { Statistic } from '@/entities/postgres/Statistic';
 import { StatisticInput } from './StatisticInput';
 import { LolObjectType } from './LolObjectType';
-import {
-    getCSGOPlayerStats,
-    getRiotPlayerId,
-    getRiotPlayerStats,
-} from '@/services/API/gameApi';
+import { getRiotPlayerId, getRiotPlayerStats } from '@/services/API/gameApi';
 
 @Resolver(() => Statistic)
 @Service()
