@@ -7,5 +7,5 @@ export const createResetPasswordUrl = async (
 ): Promise<string> => {
     const token = uuid();
     await redis.set(resetPasswordPrefix + token, userId, 'ex', 60 * 60 * 24); // 1 day expiration;
-    return `http://localhost:8001/reset-password/${token}`;
+    return `${process.env.VUE_APP_FRONTEND_URL}/reset-password/${token}`;
 };
