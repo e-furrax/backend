@@ -422,6 +422,10 @@ export class UserResolver {
         if (!languagesFound.length) {
             throw new Error('Could not find languages');
         }
+
+        if (!gamesFound.length) {
+            throw new Error('Could not find games');
+        }
         user.description = description;
 
         user.availability.value = availability;
