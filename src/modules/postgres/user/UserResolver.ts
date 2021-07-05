@@ -16,7 +16,7 @@ import { sign } from 'jsonwebtoken';
 import { MyContext } from '@/types/MyContext';
 import { isAuth } from '@/middlewares/isAuth';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { User, Status } from '@/entities/postgres/User';
+import { User, Status, UserRole } from '@/entities/postgres/User';
 import { Language } from '@/entities/postgres/Language';
 import { Game } from '@/entities/postgres/Game';
 import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
@@ -37,6 +37,7 @@ import {
     confirmationPrefix,
     resetPasswordPrefix,
 } from '@/constants/redisPrefixes';
+import { BecomeFurraxInput } from './BecomeFurraxInput';
 
 @ObjectType()
 class LoginResponse {
@@ -67,6 +68,7 @@ export class UserResolver {
             .leftJoinAndSelect('user.languages', 'languages')
             .leftJoinAndSelect('user.receivedRatings', 'receivedRatings')
             .leftJoinAndSelect('user.games', 'games')
+            .leftJoinAndSelect('user.availability', 'availability')
             .where('user.status = :status', { status: Status.VERIFIED });
 
         if (data && data.languages) {
@@ -86,6 +88,7 @@ export class UserResolver {
                 gender: data.gender,
             });
         }
+
         return usersQuery.getMany();
     }
 
@@ -387,5 +390,54 @@ export class UserResolver {
         }
 
         return user.statistics;
+    }
+
+    @Mutation(() => Boolean)
+    @UseMiddleware(isAuth)
+    async becomeFurrax(
+        @Ctx() { payload }: MyContext,
+        @Arg('data')
+        { description, availability, games, languages }: BecomeFurraxInput
+    ): Promise<boolean> {
+        const user = await this.repository.findOne(payload?.userId, {
+            relations: ['languages', 'games', 'availability'],
+        });
+
+        if (!user) {
+            throw new Error('Cannot find user');
+        }
+
+        const languagesFound = await this.languageRepository.find({
+            where: {
+                id: In(languages.ids),
+            },
+        });
+
+        const gamesFound = await this.gameRepository.find({
+            where: {
+                id: In(games.ids),
+            },
+        });
+
+        if (!languagesFound.length) {
+            throw new Error('Could not find languages');
+        }
+
+        if (!gamesFound.length) {
+            throw new Error('Could not find games');
+        }
+        user.description = description;
+        if (availability && availability !== '[]') {
+            user.availability.value = availability;
+            await this.availabilityRepository.save(user.availability);
+        }
+
+        user.languages = languagesFound;
+
+        user.role = UserRole.FURRAX;
+
+        user.games = gamesFound;
+
+        return true;
     }
 }

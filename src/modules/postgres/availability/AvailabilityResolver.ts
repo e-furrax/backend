@@ -43,10 +43,7 @@ export class AvailabilityResolver {
             throw new Error('Could not found user');
         }
 
-        if (
-            user.id !== payload?.userId ||
-            (payload?.role !== 'MODERATOR' && payload?.role !== 'ADMIN')
-        ) {
+        if (user.id !== payload?.userId) {
             throw new Error('Not authorized');
         }
 
