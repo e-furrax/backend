@@ -43,6 +43,13 @@ export class AvailabilityResolver {
             throw new Error('Could not found user');
         }
 
+        if (
+            user.id !== payload?.userId ||
+            (payload?.role !== 'MODERATOR' && payload?.role !== 'ADMIN')
+        ) {
+            throw new Error('Not authorized');
+        }
+
         user.availability.value = value;
         await this.repository.save(user.availability);
 

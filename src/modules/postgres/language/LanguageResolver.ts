@@ -1,10 +1,11 @@
 import { Language } from '@/entities/postgres/Language';
 import { Repository } from 'typeorm';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { Resolver, Query, Mutation, Arg } from 'type-graphql';
+import { Resolver, Query, Mutation, Arg, Authorized } from 'type-graphql';
 import { InsertLanguageInput } from './InsertLanguageInput';
 
 import { Service } from 'typedi';
+import { UserRole } from '@/entities/postgres/User';
 @Service()
 @Resolver()
 export class LanguageResolver {
@@ -20,6 +21,7 @@ export class LanguageResolver {
     }
 
     @Mutation(() => Language)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async createLanguage(
         @Arg('data') data: InsertLanguageInput
     ): Promise<Language> {
@@ -33,6 +35,7 @@ export class LanguageResolver {
     }
 
     @Mutation(() => Boolean)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async deleteLanguage(@Arg('id') id: number): Promise<boolean> {
         const language = await this.repository.findOne(id);
         if (!language) {
@@ -44,6 +47,7 @@ export class LanguageResolver {
     }
 
     @Mutation(() => Language)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async updateLanguage(
         @Arg('id') id: number,
         @Arg('data') data: InsertLanguageInput

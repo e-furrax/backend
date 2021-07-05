@@ -1,10 +1,11 @@
 import { Game } from '@/entities/postgres/Game';
 import { Repository } from 'typeorm';
 import { PostgresService } from '@/services/repositories/postgres-service';
-import { Resolver, Query, Mutation, Arg } from 'type-graphql';
+import { Resolver, Query, Mutation, Arg, Authorized } from 'type-graphql';
 import { InsertGameInput } from './InsertGameInput';
 
 import { Service } from 'typedi';
+import { UserRole } from '@/entities/postgres/User';
 @Service()
 @Resolver()
 export class GameResolver {
@@ -20,6 +21,7 @@ export class GameResolver {
     }
 
     @Mutation(() => Game)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async createGame(@Arg('data') data: InsertGameInput): Promise<Game> {
         const game = await this.repository
             .create({
@@ -31,6 +33,7 @@ export class GameResolver {
     }
 
     @Mutation(() => Boolean)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async deleteGame(@Arg('id') id: number): Promise<boolean> {
         const game = await this.repository.findOne(id);
         if (!game) {
@@ -42,6 +45,7 @@ export class GameResolver {
     }
 
     @Mutation(() => Game)
+    @Authorized([UserRole.MODERATOR, UserRole.ADMIN])
     async updateGame(
         @Arg('id') id: number,
         @Arg('data') data: InsertGameInput

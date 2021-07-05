@@ -18,7 +18,7 @@ import { isAuth } from '@/middlewares/isAuth';
 import { MyContext } from '@/types/MyContext';
 import { PostgresService } from '@/services/repositories/postgres-service';
 import { Message } from '@/entities/postgres/Message';
-import { User } from '@/entities/postgres/User';
+import { User, UserRole } from '@/entities/postgres/User';
 import { MessageInput } from './MessageInput';
 
 @Resolver(() => Message)
@@ -119,7 +119,6 @@ export class MessageResolver {
 
     @Query(() => [Message])
     @UseMiddleware(isAuth)
-    @Authorized()
     async getConversations(@Ctx() { payload }: MyContext): Promise<Message[]> {
         const conversationsIds = await this.repository
             .createQueryBuilder('message')
@@ -184,7 +183,12 @@ export class MessageResolver {
             );
         },
     })
-    @Authorized()
+    @Authorized([
+        UserRole.USER,
+        UserRole.FURRAX,
+        UserRole.MODERATOR,
+        UserRole.ADMIN,
+    ])
     newMessage(@Root() messagePayload: Message): Message {
         return messagePayload;
     }

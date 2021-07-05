@@ -57,6 +57,7 @@ export class AppointmentResolver {
     }
 
     @Query(() => [Appointment], { nullable: true })
+    @UseMiddleware(isAuth)
     async getAppointmentsByUser(
         @Arg('data') { from, status }: AppointmentStatusInput
     ): Promise<Appointment[]> {
@@ -136,7 +137,12 @@ export class AppointmentResolver {
     }
 
     @Mutation(() => Appointment)
-    @UseMiddleware(isAuth)
+    @Authorized([
+        UserRole.ADMIN,
+        UserRole.FURRAX,
+        UserRole.MODERATOR,
+        UserRole.USER,
+    ])
     async addTransaction(
         @Arg('appointmentId') id: string,
         @Arg('transactionInput') { price, description }: TransactionInput
