@@ -392,13 +392,13 @@ export class UserResolver {
         return user.statistics;
     }
 
-    @Mutation(() => User)
+    @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
     async becomeFurrax(
         @Ctx() { payload }: MyContext,
         @Arg('data')
         { description, availability, games, languages }: BecomeFurraxInput
-    ): Promise<User> {
+    ): Promise<boolean> {
         const user = await this.repository.findOne(payload?.userId, {
             relations: ['languages', 'games', 'availability'],
         });
@@ -427,8 +427,10 @@ export class UserResolver {
             throw new Error('Could not find games');
         }
         user.description = description;
-
-        user.availability.value = availability;
+        if (availability && availability !== '[]') {
+            user.availability.value = availability;
+            await this.availabilityRepository.save(user.availability);
+        }
 
         user.languages = languagesFound;
 
@@ -436,7 +438,6 @@ export class UserResolver {
 
         user.games = gamesFound;
 
-        await this.availabilityRepository.save(user.availability);
-        return this.repository.save(user);
+        return true;
     }
 }
