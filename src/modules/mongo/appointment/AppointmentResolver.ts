@@ -67,19 +67,28 @@ export class AppointmentResolver {
         if (!status) {
             return this.appointmentRepository.find({
                 where: {
-                    from,
+                    $or: [{ from: from }, { to: from }],
                 },
             });
         }
 
         const builtOrOperationForStatus = status.map((s) => ({ status: s }));
 
-        return this.appointmentRepository.find({
+        const fromAppointments = await this.appointmentRepository.find({
             where: {
                 from,
                 $or: builtOrOperationForStatus,
             },
         });
+
+        const toAppointments = await this.appointmentRepository.find({
+            where: {
+                to: from,
+                $or: builtOrOperationForStatus,
+            },
+        });
+
+        return [...fromAppointments, ...toAppointments];
     }
 
     @Mutation(() => Appointment)
