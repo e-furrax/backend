@@ -12,6 +12,22 @@ import {
 } from 'typeorm-fixtures-cli/dist';
 import { Rating } from '@/entities/postgres/Rating';
 
+const avatars = [
+    '/images/fixtures/bastard.jpg',
+    '/images/fixtures/bastard.png',
+    '/images/fixtures/bieber.png',
+    '/images/fixtures/chrismas.png',
+    '/images/fixtures/dollars_kiddo.jpg',
+    '/images/fixtures/frog.png',
+    '/images/fixtures/gnee.jpg',
+    '/images/fixtures/justin.png',
+    '/images/fixtures/mask.jpg',
+    '/images/fixtures/roblox.png',
+    '/images/fixtures/sad_clown.jpg',
+    '/images/fixtures/saiko.png',
+    '/images/fixtures/woah.png',
+];
+
 const generateRandomRatings = async (
     userRepository: Repository<User>,
     ratingRepository: Repository<Rating>,
@@ -61,6 +77,10 @@ export const loadFixtures = async (connection: Connection) => {
             );
             user.availability = availability;
             user.status = Status.VERIFIED;
+            user.profileImage =
+                avatars[
+                    faker.datatype.number({ min: 1, max: avatars.length - 1 })
+                ];
             fx.push(repository.save(user));
         } else {
             fx.push(repository.save(entity));
