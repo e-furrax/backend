@@ -40,7 +40,7 @@ import {
 import { BecomeFurraxInput } from './BecomeFurraxInput';
 
 @ObjectType()
-class LoginResponse {
+class LoginResponse extends User {
     @Field()
     accessToken: string;
 }
@@ -152,7 +152,7 @@ export class UserResolver {
     async login(
         @Arg('email') email: string,
         @Arg('password') password: string
-    ): Promise<any> {
+    ): Promise<Partial<LoginResponse>> {
         const user = await this.repository.findOne({ where: { email } });
 
         if (!user) {
@@ -167,7 +167,6 @@ export class UserResolver {
         if (user.status !== Status.VERIFIED) {
             throw new Error('Registration incomplete');
         }
-
         return {
             accessToken: sign(
                 { userId: user.id, role: user.role },
@@ -176,11 +175,14 @@ export class UserResolver {
                     expiresIn: '1y',
                 }
             ),
+            ...user,
         };
     }
 
     @Mutation(() => LoginResponse)
-    async confirmUser(@Arg('code') code: string): Promise<LoginResponse> {
+    async confirmUser(
+        @Arg('code') code: string
+    ): Promise<Partial<LoginResponse>> {
         const userId = await redis.get(confirmationPrefix + code);
 
         if (!userId) {
@@ -200,6 +202,7 @@ export class UserResolver {
             accessToken: sign({ userId, role: user.role }, 's3cr3tk3y', {
                 expiresIn: '1y',
             }),
+            ...user,
         };
     }
 
