@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 const csGoApiKey = '9c2da57a-f1cf-4e0b-be3d-6e6971b1c92a';
-const riotApiKey = 'RGAPI-a5c0af82-135c-4aca-9e3d-4ca1ae1056d3';
+const riotApiKey = 'RGAPI-b0d24bde-c7c8-4e5c-b574-6edf72741ded';
 
 function errorCheck(error: any) {
     switch (error.response.status) {
