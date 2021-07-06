@@ -184,8 +184,8 @@ export class MessageResolver {
             context: MyContext;
         }) => {
             return (
-                messagePayload.toUser.id === context.payload?.userId ||
-                messagePayload.fromUser.id === context.payload?.userId
+                messagePayload.toUser.id == context.payload?.userId ||
+                messagePayload.fromUser.id == context.payload?.userId
             );
         },
     })
