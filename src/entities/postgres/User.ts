@@ -62,7 +62,11 @@ export class User extends BaseEntity {
     gender: string;
 
     @Field({ nullable: true })
-    @Column({ type: 'text', nullable: true })
+    @Column({
+        type: 'text',
+        nullable: true,
+        default: 'This user has no description',
+    })
     description?: string;
 
     @Column()

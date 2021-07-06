@@ -65,6 +65,7 @@ export class MessageResolver {
 
     @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
+    @Authorized()
     async sendMessage(
         @Ctx() { payload }: MyContext,
         @Arg('data') { content, toUser }: MessageInput,

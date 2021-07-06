@@ -68,7 +68,7 @@ items:
             - '@language*'
         games:
             - '@game*'
-    user{7..10}:
+    user{7..15}:
         username: '{{internet.userName}}'
         email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
