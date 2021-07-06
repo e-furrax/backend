@@ -104,11 +104,11 @@ export class AppointmentResolver {
             return Promise.reject(Error('Missing User ID'));
         }
 
-        const user = await this.userRepository.findOne(fromUser);
+        const user = await this.userRepository.findOne(+fromUser);
         const furrax = await this.userRepository.findOne(to);
 
         const appointment = this.appointmentRepository.create({
-            from: fromUser,
+            from: +fromUser,
             to,
             date,
             description,
