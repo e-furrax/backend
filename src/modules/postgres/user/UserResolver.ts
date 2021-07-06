@@ -441,6 +441,8 @@ export class UserResolver {
 
         user.games = gamesFound;
 
+        await this.repository.save(user);
+
         return true;
     }
 }
