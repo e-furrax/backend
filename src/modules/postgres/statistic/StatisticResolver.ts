@@ -58,6 +58,7 @@ export class StatisticResolver {
                     playerId,
                     game,
                     mode,
+                    user: { id: payload?.userId },
                 },
             });
 
