@@ -22,7 +22,7 @@ jobs:
         run: sleep 60
 
       - name: install
-        run: yarn install jest
+        run: yarn add jest
 
       - name: run the test
         run: yarn run jest
