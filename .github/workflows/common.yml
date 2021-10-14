@@ -9,23 +9,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install modules
+        run: yarn
+
+      - name: Build
+        run: yarn run build
+
       - name: Build the docker
         run: docker-compose up -d
-
-      - name: install dependences
-        run: npm install
 
       - name: run the test
         run: npm run test
 
       - name: down the docker
         run: docker-compose down
-
-      - name: Install modules
-        run: yarn
-
-      - name: Build
-        run: yarn run build
 
       - name: Create artifact directory
         run: mkdir -p artifact/src
