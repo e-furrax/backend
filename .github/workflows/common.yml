@@ -22,10 +22,10 @@ jobs:
         run: sleep 60
 
       - name: install
-        run: npm install jest
+        run: yarn install jest
 
       - name: run the test
-        run: jest
+        run: yarn run jest
 
       - name: down the docker
         run: docker-compose down
