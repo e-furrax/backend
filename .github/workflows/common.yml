@@ -16,7 +16,7 @@ jobs:
         run: npm run test
 
       - name: down the docker
-          run: docker-compose down
+        run: docker-compose down
 
       - name: Install modules
         run: yarn
