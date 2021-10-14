@@ -176,7 +176,7 @@ describe('removeRating', () => {
         expect(data2.errors).toBeDefined();
     });
     it('getRatings no perm', async () => {
-        await login('test@test.fr', 'password');
+        await login('tom@gmail.com', 'password');
         const data = { ratings: { ids: [113] } };
         const response = await request
             .post('/graphql')

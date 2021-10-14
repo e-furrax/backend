@@ -37,7 +37,7 @@ describe('updateRole', () => {
         expect(data2.errors).toBeDefined();
     });
     it('updateRole no perm', async () => {
-        await login('test@test.fr', 'password');
+        await login('tom@gmail.com', 'password');
         const data = { promotion: { id: 6, role: 'FURRAX' } };
         const response = await request
             .post('/graphql')
