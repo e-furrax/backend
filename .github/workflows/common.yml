@@ -18,6 +18,9 @@ jobs:
       - name: Build the docker
         run: docker-compose up -d
 
+      - name: wait for the api to up
+        run: sleep(60)
+
       - name: run the test
         run: npm run test
 
