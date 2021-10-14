@@ -21,10 +21,11 @@ jobs:
       - name: wait for the api to up
         run: sleep 60
 
+      - name: install
+        run: npm install jest
+
       - name: run the test
-        uses: stefanoeb/jest-action@1.0.3
-        with:
-          jestArgs: src/__test__
+        run: jest
 
       - name: down the docker
         run: docker-compose down
