@@ -10,10 +10,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build the docker
-          run: docker-compose up -d
+        run: docker-compose up -d
 
       - name: run the test
-          run: npm run test
+        run: npm run test
 
       - name: down the docker
           run: docker-compose down
