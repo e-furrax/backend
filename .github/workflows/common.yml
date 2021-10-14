@@ -19,7 +19,7 @@ jobs:
         run: docker-compose up -d
 
       - name: wait for the api to up
-        run: sleep 60
+        run: sleep 120
 
       - name: install
         run: yarn add jest
