@@ -21,6 +21,9 @@ jobs:
       - name: wait for the api to up
         run: sleep 60
 
+      - name: install
+        run: npm install
+
       - name: run the test
         run: npm run test
 
