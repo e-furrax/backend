@@ -84,6 +84,10 @@ export class User extends BaseEntity {
     @Column({ type: 'text', nullable: true })
     profileImage: string;
 
+    @Field({ nullable: true })
+    @Column({ type: 'text', nullable: true })
+    donationLink: string;
+
     @Field(() => [Rating], { defaultValue: [] })
     @OneToMany(() => Rating, (rating) => rating.toUser)
     receivedRatings: Rating[];

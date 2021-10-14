@@ -50,7 +50,7 @@ services:
 
     redis:
         container_name: redis_container
-        command: redis-server --requirepass furrax
+        command: redis-server
         image: redis:alpine
         ports:
             - '6379:6379'

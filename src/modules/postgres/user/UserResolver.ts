@@ -1,42 +1,42 @@
 import * as bcrypt from 'bcryptjs';
 import {
-    Resolver,
-    Mutation,
     Arg,
-    Query,
-    UseMiddleware,
     Ctx,
-    ObjectType,
     Field,
+    Mutation,
+    ObjectType,
+    Query,
+    Resolver,
+    UseMiddleware,
 } from 'type-graphql';
-import { Repository, In } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Service } from 'typedi';
 import { sign } from 'jsonwebtoken';
 
-import { MyContext } from '@/types/MyContext';
-import { isAuth } from '@/middlewares/isAuth';
-import { PostgresService } from '@/services/repositories/postgres-service';
-import { User, Status, UserRole } from '@/entities/postgres/User';
-import { Language } from '@/entities/postgres/Language';
-import { Game } from '@/entities/postgres/Game';
-import { LanguagesInput } from '@/modules/postgres/language/LanguagesInput';
-import { GamesInput } from '@/modules/postgres/game/GamesInput';
+import { MyContext } from '../../../types/MyContext';
+import { isAuth } from '../../..//middlewares/isAuth';
+import { PostgresService } from '../../../services/repositories/postgres-service';
+import { Status, User, UserRole } from '../../../entities/postgres/User';
+import { Language } from '../../../entities/postgres/Language';
+import { Game } from '../../../entities/postgres/Game';
+import { LanguagesInput } from '../language/LanguagesInput';
+import { GamesInput } from '../game/GamesInput';
 import { UserInput } from './UserInput';
 import {
     sendConfirmationEmail,
     sendResetPasswordEmail,
-} from '@/utils/sendEmail';
-import { createConfirmationCode } from '@/utils/createConfirmationCode';
-import { redis } from '@/redis';
+} from '../../../utils/sendEmail';
+import { createConfirmationCode } from '../../../utils/createConfirmationCode';
+import { redis } from '../../../redis';
 import { FilterInput } from './FilterInput';
 import { RegisterInput } from './register/RegisterInput';
-import { Availability } from '@/entities/postgres/Availability';
-import { Statistic } from '@/entities/postgres/Statistic';
-import { createResetPasswordUrl } from '@/utils/createResetPasswordUrl';
+import { Availability } from '../../../entities/postgres/Availability';
+import { Statistic } from '../../../entities/postgres/Statistic';
+import { createResetPasswordUrl } from '../../../utils/createResetPasswordUrl';
 import {
     confirmationPrefix,
     resetPasswordPrefix,
-} from '@/constants/redisPrefixes';
+} from '../../../constants/redisPrefixes';
 import { BecomeFurraxInput } from './BecomeFurraxInput';
 
 @ObjectType()
@@ -156,7 +156,7 @@ export class UserResolver {
         const user = await this.repository.findOne({ where: { email } });
 
         if (!user) {
-            throw new Error('Could not find user');
+            throw new Error('Could not find users');
         }
 
         const verify = await bcrypt.compare(password, user.password);
@@ -166,6 +166,10 @@ export class UserResolver {
 
         if (user.status !== Status.VERIFIED) {
             throw new Error('Registration incomplete');
+        }
+
+        if (user.role === UserRole.BANNED) {
+            throw new Error('BANNED');
         }
         return {
             accessToken: sign(
@@ -394,6 +398,28 @@ export class UserResolver {
 
         return user.statistics;
     }
+    @Mutation(() => Boolean)
+    @UseMiddleware(isAuth)
+    async addDonationLink(
+        @Ctx() { payload }: MyContext,
+        @Arg('data') data: string
+    ): Promise<boolean> {
+        const user = await this.repository.findOne({
+            where: {
+                id: payload?.userId,
+            },
+        });
+
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        user.donationLink = data;
+
+        await this.repository.save(user);
+
+        return true;
+    }
 
     @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
@@ -440,6 +466,29 @@ export class UserResolver {
         user.role = UserRole.FURRAX;
 
         user.games = gamesFound;
+
+        await this.repository.save(user);
+
+        return true;
+    }
+
+    @Mutation(() => Boolean)
+    @UseMiddleware(isAuth)
+    async updateDonationLink(
+        @Ctx() { payload }: MyContext,
+        @Arg('data') data: string
+    ): Promise<boolean> {
+        const user = await this.repository.findOne({
+            where: {
+                id: payload?.userId,
+            },
+        });
+
+        if (!user) {
+            throw new Error('Could not find user');
+        }
+
+        user.donationLink = data;
 
         await this.repository.save(user);
 

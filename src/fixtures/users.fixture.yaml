@@ -4,7 +4,7 @@ items:
         username: Pierre
         email: pierre@gmail.com
         description: '{{lorem.paragraph}}'
-        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
+        password: '$2a$12$utgbTnLYDEH1tgnLHscOouAIRphIHJ/QJYW9.0cGOgYqVIstrri7W'
         gender: 'Male'
         status: 1
         role: 'ADMIN'
@@ -17,7 +17,7 @@ items:
         email: basile@gmail.com
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.past}}'
-        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
+        password: '$2a$12$utgbTnLYDEH1tgnLHscOouAIRphIHJ/QJYW9.0cGOgYqVIstrri7W'
         gender: 'Male'
         status: 1
         role: 'MODERATOR'
@@ -30,7 +30,7 @@ items:
         email: thomas@gmail.com
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.past}}'
-        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
+        password: '$2a$12$utgbTnLYDEH1tgnLHscOouAIRphIHJ/QJYW9.0cGOgYqVIstrri7W'
         gender: 'Male'
         status: 1
         role: 'FURRAX'
@@ -44,7 +44,7 @@ items:
         email: tom@gmail.com
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.past}}'
-        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
+        password: '$2a$12$utgbTnLYDEH1tgnLHscOouAIRphIHJ/QJYW9.0cGOgYqVIstrri7W'
         gender: 'Male'
         status: 1
         role: 'USER'
@@ -60,7 +60,7 @@ items:
         email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.past}}'
-        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
+        password: '$2a$12$utgbTnLYDEH1tgnLHscOouAIRphIHJ/QJYW9.0cGOgYqVIstrri7W'
         gender: 'Female'
         status: 1
         role: 'USER'
@@ -73,7 +73,7 @@ items:
         email: '{{internet.exampleEmail}}'
         description: '{{lorem.paragraph}}'
         createdAt: '{{date.past}}'
-        password: '$2y$12$qMKhcbrxzHQCQTfq.3TBfO7iBXKaF6OYsk3yQZj3XvNTPhP9XJxWm'
+        password: '$2a$12$utgbTnLYDEH1tgnLHscOouAIRphIHJ/QJYW9.0cGOgYqVIstrri7W'
         gender: 'Male'
         status: 1
         role: 'USER'
