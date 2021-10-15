@@ -15,20 +15,20 @@ jobs:
       - name: Build
         run: yarn run build
 
-      - name: Build the docker
-        run: docker-compose up -d
+      #- name: Build the docker
+      #  run: docker-compose up -d
 
-      - name: wait for the api to up
-        run: sleep 180
+      #- name: wait for the api to up
+      #run: sleep 180
 
-      - name: install
-        run: yarn add jest
+      #- name: install
+      #  run: yarn add jest
 
-      - name: run the test
-        run: yarn run jest
+      #- name: run the test
+      #  run: yarn run jest
 
-      - name: down the docker
-        run: docker-compose down
+      #- name: down the docker
+      #  run: docker-compose down
 
       - name: Create artifact directory
         run: mkdir -p artifact/src
